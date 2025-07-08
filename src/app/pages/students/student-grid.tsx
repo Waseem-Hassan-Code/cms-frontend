@@ -62,7 +62,6 @@ const StudentGrid = ({ filters, onRowClick }: StudentGridProps) => {
 
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "#1976d2",
-              //   color: "#fff",
               fontWeight: "bold",
               fontSize: "1rem",
             },

@@ -4,7 +4,6 @@ import {
   Paper,
   InputAdornment,
   Grid,
-  Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import type { Filters } from "./type-hooks/type";
