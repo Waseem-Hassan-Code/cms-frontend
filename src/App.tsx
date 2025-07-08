@@ -1,10 +1,9 @@
-import AppLayout from "./app/layout/app-layout";
-import SideBar from "./app/layout/sidebar";
+import AppRoutes from "./app/router/app-routes";
 
 function App() {
   return (
     <>
-      <AppLayout />
+      <AppRoutes />
     </>
   );
 }
