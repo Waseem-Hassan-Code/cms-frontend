@@ -21,6 +21,7 @@ import FactCheckIcon from "@mui/icons-material/FactCheck";
 import SettingsIcon from "@mui/icons-material/Settings";
 import type { JSX } from "react";
 import { blue } from "@mui/material/colors";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
 
 const drawerWidth = 280;
 
@@ -36,6 +37,7 @@ const primaryNavItems: NavItem[] = [
   { text: "Teachers", icon: <PeopleIcon />, path: "/teachers" },
   { text: "Classes", icon: <ClassIcon />, path: "/classes" },
   { text: "Attendance", icon: <FactCheckIcon />, path: "/attendance" },
+  { text: "Admissions", icon: <HowToRegIcon />, path: "/admission" },
 ];
 
 const secondaryNavItems: NavItem[] = [

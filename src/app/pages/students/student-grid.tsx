@@ -36,17 +36,13 @@ const StudentGrid = ({ filters, onRowClick }: StudentGridProps) => {
         backgroundColor: "#f5f7fa",
       }}
     >
-      <Box
-        sx={{
-          maxHeight: "600px",
-          overflow: "auto",
-          width: "100%",
-        }}
-      >
+      <Box sx={{ width: "100%" }}>
         <DataGrid
           rows={students}
           columns={columns}
           autoHeight
+          disableColumnMenu
+          hideFooterSelectedRowCount
           pageSizeOptions={[5, 10, 20]}
           initialState={{
             pagination: { paginationModel: { pageSize: 8, page: 0 } },
@@ -62,6 +58,7 @@ const StudentGrid = ({ filters, onRowClick }: StudentGridProps) => {
 
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "#1976d2",
+              color: "#fff",
               fontWeight: "bold",
               fontSize: "1rem",
             },
@@ -79,6 +76,7 @@ const StudentGrid = ({ filters, onRowClick }: StudentGridProps) => {
 
             "& .MuiDataGrid-cell": {
               borderBottom: "1px solid #e0e0e0",
+              fontSize: "0.875rem",
             },
 
             "& .MuiDataGrid-row:nth-of-type(odd)": {

@@ -6,6 +6,7 @@ import Layout from "../layout/app-layout";
 import Classes from "../pages/classes";
 import Attendance from "../pages/attendance";
 import StudentPage from "../pages/students";
+import AdmissionPage from "../pages/student-admissions";
 
 const AppRoutes = () => {
   return (
@@ -16,6 +17,8 @@ const AppRoutes = () => {
           <Route path="/students" element={<StudentPage />} />
           <Route path="/classes" element={<Classes />} />
           <Route path="/attendance" element={<Attendance />} />
+          <Route path="/admission" element={<AdmissionPage />} />
+          {/* Add more routes as needed */}
         </Routes>
       </Layout>
     </Router>

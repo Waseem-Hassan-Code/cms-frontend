@@ -7,7 +7,7 @@ export default function StudentEvaluationPanel() {
     attendance: "92%",
     remarks: "Consistent performance, needs improvement in math.",
     lastUpdated: "2023-06-20",
-    status: "In Progress", // or "Excellent", "Needs Improvement", etc.
+    status: "In Progress",
   };
 
   return (
