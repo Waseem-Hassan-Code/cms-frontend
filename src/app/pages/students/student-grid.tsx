@@ -1,4 +1,5 @@
 // src/pages/students/components/StudentGrid.tsx
+
 import {
   DataGrid,
   type GridColDef,
@@ -27,25 +28,67 @@ const StudentGrid = ({ filters, onRowClick }: StudentGridProps) => {
   ];
 
   return (
-    <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
-      <Box sx={{ maxHeight: 600, width: "100%" }}>
+    <Paper
+      elevation={3}
+      sx={{
+        p: 2,
+        borderRadius: 3,
+        backgroundColor: "#f5f7fa",
+      }}
+    >
+      <Box
+        sx={{
+          maxHeight: "600px",
+          overflow: "auto",
+          width: "100%",
+        }}
+      >
         <DataGrid
           rows={students}
           columns={columns}
+          autoHeight
           pageSizeOptions={[5, 10, 20]}
           initialState={{
-            pagination: { paginationModel: { pageSize: 10, page: 0 } },
+            pagination: { paginationModel: { pageSize: 8, page: 0 } },
           }}
           loading={loading}
           onRowClick={(params: GridRowParams) =>
             onRowClick(params.row as Student)
           }
           sx={{
+            bgcolor: "#ffffff",
+            borderRadius: 2,
+            border: "none",
+
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: "#1976d2",
+              //   color: "#fff",
+              fontWeight: "bold",
+              fontSize: "1rem",
+            },
+
+            "& .MuiDataGrid-columnHeaderTitle": {
+              fontWeight: "bold",
+            },
+
             "& .MuiDataGrid-row": {
               cursor: "pointer",
               "&:hover": {
-                backgroundColor: "rgba(25, 118, 210, 0.08)",
+                backgroundColor: "#e3f2fd",
               },
+            },
+
+            "& .MuiDataGrid-cell": {
+              borderBottom: "1px solid #e0e0e0",
+            },
+
+            "& .MuiDataGrid-row:nth-of-type(odd)": {
+              backgroundColor: "#fafafa",
+            },
+
+            "& .MuiDataGrid-footerContainer": {
+              backgroundColor: "#f0f0f0",
+              borderTop: "1px solid #e0e0e0",
             },
           }}
         />

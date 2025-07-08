@@ -24,15 +24,6 @@ const StudentPage = () => {
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      <Typography
-        variant="h4"
-        component="h1"
-        gutterBottom
-        sx={{ fontWeight: 600, color: "primary.main" }}
-      >
-        Student Management
-      </Typography>
-
       {!selectedStudent ? (
         <>
           <StudentFilters filters={filters} setFilters={setFilters} />

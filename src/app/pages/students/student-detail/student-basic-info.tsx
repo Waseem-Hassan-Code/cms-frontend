@@ -9,14 +9,14 @@ interface StudentBasicInfoProps {
 const StudentBasicInfo = ({ student }: StudentBasicInfoProps) => {
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12} md={2}>
+      <Grid size={{ xs: 12, md: 2 }}>
         <Avatar
           alt={student.name}
           src={student.avatar}
           sx={{ width: 120, height: 120, border: "2px solid #1976d2" }}
         />
       </Grid>
-      <Grid item xs={12} md={5}>
+      <Grid size={{ xs: 12, md: 5 }}>
         <Typography variant="h6" gutterBottom>
           {student.name}
         </Typography>
@@ -32,7 +32,7 @@ const StudentBasicInfo = ({ student }: StudentBasicInfoProps) => {
           </Typography>
         </Box>
       </Grid>
-      <Grid item xs={12} md={5}>
+      <Grid size={{ xs: 12, md: 5 }}>
         <Typography variant="subtitle1" gutterBottom>
           Contact Information
         </Typography>

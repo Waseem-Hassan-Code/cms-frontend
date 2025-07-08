@@ -1,13 +1,6 @@
 // src/pages/students/components/StudentDetail.tsx
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  Grid,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Button, Container, Paper, Grid, Typography } from "@mui/material";
+
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import type { Student } from "../type-hooks/type";
 import StudentBasicInfo from "./student-basic-info";
@@ -41,13 +34,13 @@ const StudentDetail = ({ student, onBack }: StudentDetailProps) => {
       </Paper>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <StudentFeePanel studentId={student.id} />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <StudentEvaluationPanel />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <StudentExamResultsPanel />
         </Grid>
       </Grid>

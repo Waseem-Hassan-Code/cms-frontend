@@ -1,11 +1,10 @@
-// src/pages/students/components/StudentFilters.tsx
-
 import {
   TextField,
   MenuItem,
   Paper,
   InputAdornment,
   Grid,
+  Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import type { Filters } from "./type-hooks/type";
@@ -29,10 +28,15 @@ const StudentFilters = ({ filters, setFilters }: StudentFiltersProps) => {
   return (
     <Paper
       elevation={3}
-      sx={{ p: 3, mb: 4, borderRadius: 2, backgroundColor: "#f9f9f9" }}
+      sx={{ p: 2, mb: 3, borderRadius: 2, backgroundColor: "#f9f9f9" }}
     >
-      <Grid container spacing={3} alignItems="center">
-        <Grid item xs={12} md={4}>
+      <Grid
+        container
+        spacing={2}
+        alignItems="flex-end"
+        justifyContent="flex-start"
+      >
+        <Grid size={{ xs: 12, md: 1.5 }}>
           <TextField
             select
             fullWidth
@@ -42,12 +46,12 @@ const StudentFilters = ({ filters, setFilters }: StudentFiltersProps) => {
             onChange={handleChange}
             variant="outlined"
             size="medium"
-            sx={{ minWidth: 200 }}
             SelectProps={{
               MenuProps: {
                 PaperProps: {
                   style: {
                     maxHeight: 250,
+                    width: 150,
                   },
                 },
               },
@@ -62,7 +66,7 @@ const StudentFilters = ({ filters, setFilters }: StudentFiltersProps) => {
           </TextField>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 1.5 }}>
           <TextField
             select
             fullWidth
@@ -72,12 +76,12 @@ const StudentFilters = ({ filters, setFilters }: StudentFiltersProps) => {
             onChange={handleChange}
             variant="outlined"
             size="medium"
-            sx={{ minWidth: 200 }}
             SelectProps={{
               MenuProps: {
                 PaperProps: {
                   style: {
                     maxHeight: 250,
+                    width: 150,
                   },
                 },
               },
@@ -92,7 +96,7 @@ const StudentFilters = ({ filters, setFilters }: StudentFiltersProps) => {
           </TextField>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <TextField
             fullWidth
             label="Search Students"
