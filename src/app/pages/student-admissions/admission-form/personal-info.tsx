@@ -1,6 +1,6 @@
 // src/pages/admissions/components/form-steps/PersonalInfoStep.tsx
 import { Box, Grid, TextField, MenuItem } from "@mui/material";
-import { Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { DatePicker } from "@mui/x-date-pickers";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -11,6 +11,18 @@ interface PersonalInfoStepProps {
 }
 
 const PersonalInfoStep = ({ control, errors }: PersonalInfoStepProps) => {
+  useForm({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      gender: "Female",
+      dateOfBirth: null,
+      bloodGroup: "",
+      religion: "Islam",
+      nationality: "Pakistani",
+    },
+  });
+
   const genders = ["Male", "Female", "Other"];
   const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
   const religions = ["Islam", "Christianity", "Hinduism", "Sikhism", "Other"];

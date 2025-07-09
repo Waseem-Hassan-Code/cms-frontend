@@ -1,4 +1,4 @@
-export interface AdmissionFormData {
+export interface StudentAdmissionForm {
   firstName: string;
   lastName: string;
   gender: string;
@@ -36,9 +36,4 @@ export interface AdmissionFormData {
 
   // Metadata
   remarks: string;
-}
-
-export interface AdmissionRecord extends AdmissionFormData {
-  id: string;
-  status: "Active" | "Inactive";
 }

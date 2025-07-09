@@ -1,36 +1,66 @@
 // src/pages/admissions/components/AdmissionForm.tsx
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  Box,
-  Button,
-  Stepper,
-  Step,
-  StepLabel,
-  Paper,
-  Typography,
-} from "@mui/material";
-import type { AdmissionFormData } from "../types-hooks/admission-types";
+import { Box, Button, Stepper, Step, StepLabel, Paper } from "@mui/material";
+import { useDispatch } from "react-redux";
 import PersonalInfoStep from "./personal-info";
 import ContactInfoStep from "./contact-info";
 import GuardianInfoStep from "./guardian-info";
 import FeeInfoStep from "./fee-info";
+import type { AppDispatch } from "../../../../redux/store";
+import type { AdmissionFormData } from "../types-hooks/admission-types";
+import { admitStudent } from "../../../../redux/student-admission/student-admission-thunks";
 
 const steps = ["Personal Info", "Contact Info", "Guardian Info", "Fee Details"];
 
 const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
   const [activeStep, setActiveStep] = useState(0);
+  const dispatch = useDispatch<AppDispatch>();
+
   const {
     control,
     handleSubmit,
     formState: { errors },
     trigger,
-  } = useForm<AdmissionFormData>();
+  } = useForm<AdmissionFormData>({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      gender: "Female",
+      dateOfBirth: "",
+      nationality: "Pakistani",
+      religion: "Islam",
+      bloodGroup: "",
+
+      email: "",
+      phone: "",
+      address: "",
+      city: "",
+      postalCode: "",
+      country: "Pakistan",
+
+      admissionDate: "",
+      previousSchool: "",
+      previousClass: "",
+      registrationNumber: "",
+      isActive: true,
+
+      fatherName: "",
+      fatherOccupation: "",
+      fatherPhone: "",
+      motherName: "",
+      guardianEmail: "",
+
+      profileImageUrl: "",
+      cnicNumber: "",
+      birthCertificateNo: "",
+      remarks: "",
+    },
+  });
 
   const handleNext = async () => {
     let isValid = false;
 
-    // Validate current step fields
     switch (activeStep) {
       case 0:
         isValid = await trigger([
@@ -41,7 +71,13 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
         ]);
         break;
       case 1:
-        isValid = await trigger(["phone", "address", "city", "country"]);
+        isValid = await trigger([
+          "email",
+          "phone",
+          "address",
+          "city",
+          "country",
+        ]);
         break;
       case 2:
         isValid = await trigger(["fatherName", "fatherPhone"]);
@@ -51,18 +87,19 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
     }
 
     if (isValid) {
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      setActiveStep((prev) => prev + 1);
     }
   };
 
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
+  const handleBack = () => setActiveStep((prev) => prev - 1);
 
-  const onSubmit = (data: AdmissionFormData) => {
-    console.log("Form submitted:", data);
-    // Handle form submission
-    onClose();
+  const onSubmit = async (data: AdmissionFormData) => {
+    try {
+      await dispatch(admitStudent(data)).unwrap();
+      onClose();
+    } catch (err: any) {
+      console.error("Admission submission failed:", err);
+    }
   };
 
   return (

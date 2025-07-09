@@ -1,11 +1,16 @@
 // src/pages/admissions/AdmissionPage.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Button, Container, Typography } from "@mui/material";
 import AdmissionGrid from "./admission-grid";
 import AdmissionForm from "./admission-form/admission-form";
+import { toast } from "sonner";
 
 const AdmissionPage = () => {
   const [openForm, setOpenForm] = useState(false);
+
+  useEffect(() => {
+    toast.success("Loaded Success!");
+  }, []);
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
