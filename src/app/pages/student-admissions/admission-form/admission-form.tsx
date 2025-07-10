@@ -10,8 +10,15 @@ import FeeInfoStep from "./fee-info";
 import type { AppDispatch } from "../../../../redux/store";
 import type { AdmissionFormData } from "../types-hooks/admission-types";
 import { admitStudent } from "../../../../redux/student-admission/student-admission-thunks";
+import PreviousAcademia from "./previous-academia";
 
-const steps = ["Personal Info", "Contact Info", "Guardian Info", "Fee Details"];
+const steps = [
+  "Personal Info",
+  "Contact Info",
+  "Guardian Info",
+  "Academia Info",
+  "Fee Details",
+];
 
 const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
   const [activeStep, setActiveStep] = useState(0);
@@ -60,6 +67,10 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
 
   const handleNext = async () => {
     let isValid = false;
+
+    if (activeStep === 4) {
+      // dispatch(admitStudent());
+    }
 
     switch (activeStep) {
       case 0:
@@ -122,7 +133,11 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
         {activeStep === 2 && (
           <GuardianInfoStep control={control} errors={errors} />
         )}
-        {activeStep === 3 && <FeeInfoStep control={control} errors={errors} />}
+        {activeStep === 3 && (
+          <PreviousAcademia control={control} errors={errors} />
+        )}
+
+        {activeStep === 4 && <FeeInfoStep control={control} errors={errors} />}
 
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
           <Button
