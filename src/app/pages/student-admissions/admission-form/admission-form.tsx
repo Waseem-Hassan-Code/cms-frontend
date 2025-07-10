@@ -11,6 +11,7 @@ import type { AppDispatch } from "../../../../redux/store";
 import type { AdmissionFormData } from "../types-hooks/admission-types";
 import { admitStudent } from "../../../../redux/student-admission/student-admission-thunks";
 import PreviousAcademia from "./previous-academia";
+import { toast } from "sonner";
 
 const steps = [
   "Personal Info",
@@ -23,6 +24,7 @@ const steps = [
 const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
   const [activeStep, setActiveStep] = useState(0);
   const dispatch = useDispatch<AppDispatch>();
+  const [studentAdmitted, setStudentAdmitted] = useState(false);
 
   const {
     control,
@@ -66,12 +68,8 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
   });
 
   const handleNext = async () => {
+    console.log("Active Step:", activeStep);
     let isValid = false;
-
-    if (activeStep === 4) {
-      // dispatch(admitStudent());
-    }
-
     switch (activeStep) {
       case 0:
         isValid = await trigger([
@@ -93,6 +91,18 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
       case 2:
         isValid = await trigger(["fatherName", "fatherPhone"]);
         break;
+      case 3:
+        isValid = await trigger([
+          "admissionDate",
+          "previousSchool",
+          "previousClass",
+          "registrationNumber",
+        ]);
+        if (isValid) {
+          handleSubmit(onSubmit)();
+          return;
+        }
+        break;
       default:
         isValid = true;
     }
@@ -106,10 +116,20 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
 
   const onSubmit = async (data: AdmissionFormData) => {
     try {
-      await dispatch(admitStudent(data)).unwrap();
-      onClose();
+      if (activeStep == steps.length - 2 && !studentAdmitted) {
+        const result = await dispatch(admitStudent(data)).unwrap();
+        if (result.isSuccess) {
+          toast.success("Admission submitted successfully!");
+          setStudentAdmitted(true);
+        } else {
+          toast.error(`Error submitting admission: ${result.message}`);
+          return;
+        }
+      }
+
+      setActiveStep((prev) => prev + 1);
     } catch (err: any) {
-      console.error("Admission submission failed:", err);
+      toast.error(`Error submitting admission: ${err.message}`);
     }
   };
 
@@ -148,9 +168,13 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
             {activeStep === 0 ? "Cancel" : "Back"}
           </Button>
 
-          {activeStep < steps.length - 1 ? (
+          {activeStep < steps.length - 2 ? (
             <Button variant="contained" onClick={handleNext} sx={{ px: 4 }}>
               Next
+            </Button>
+          ) : activeStep == steps.length - 2 ? (
+            <Button variant="contained" onClick={handleNext} sx={{ px: 4 }}>
+              Admit Student
             </Button>
           ) : (
             <Button variant="contained" type="submit" sx={{ px: 4 }}>
