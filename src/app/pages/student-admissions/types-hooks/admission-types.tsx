@@ -1,4 +1,5 @@
 export interface AdmissionFormData {
+  id?: string; // unique identifier for the student
   firstName: string;
   lastName: string;
   gender: string;
@@ -36,7 +37,15 @@ export interface AdmissionFormData {
 
   // Metadata
   remarks: string;
+  activeStep: number;
 }
+
+export type FeeInfoData = {
+  admissionFee: number;
+  tuitionFee: number;
+  paymentMethod: string;
+  remarks?: string;
+};
 
 export interface AdmissionRecord extends AdmissionFormData {
   id: string;

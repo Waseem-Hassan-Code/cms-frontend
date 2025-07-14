@@ -1,4 +1,5 @@
 export interface StudentAdmissionForm {
+  id?: string;
   firstName: string;
   lastName: string;
   gender: string;
@@ -36,4 +37,16 @@ export interface StudentAdmissionForm {
 
   // Metadata
   remarks: string;
+  activeStep: number;
+}
+
+export interface GetAdmittedStudentsDto {
+  id: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  createdAt: string;
+  fatherName: string;
+  phone: string;
+  activeStep: number;
 }

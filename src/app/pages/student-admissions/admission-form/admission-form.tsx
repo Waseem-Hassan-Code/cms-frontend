@@ -1,17 +1,23 @@
-// src/pages/admissions/components/AdmissionForm.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Box, Button, Stepper, Step, StepLabel, Paper } from "@mui/material";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import PersonalInfoStep from "./personal-info";
 import ContactInfoStep from "./contact-info";
 import GuardianInfoStep from "./guardian-info";
 import FeeInfoStep from "./fee-info";
-import type { AppDispatch } from "../../../../redux/store";
-import type { AdmissionFormData } from "../types-hooks/admission-types";
-import { admitStudent } from "../../../../redux/student-admission/student-admission-thunks";
+import type { AppDispatch, RootState } from "../../../../redux/store";
+import type {
+  AdmissionFormData,
+  FeeInfoData,
+} from "../types-hooks/admission-types";
+import {
+  admitStudent,
+  getStudentById,
+} from "../../../../redux/student-admission/student-admission-thunks";
 import PreviousAcademia from "./previous-academia";
 import { toast } from "sonner";
+import { formatDate } from "../../../../utilities/date-formatter";
 
 const steps = [
   "Personal Info",
@@ -23,14 +29,25 @@ const steps = [
 
 const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
   const [activeStep, setActiveStep] = useState(0);
-  const dispatch = useDispatch<AppDispatch>();
   const [studentAdmitted, setStudentAdmitted] = useState(false);
 
+  const dispatch = useDispatch<AppDispatch>();
+  const { studentId, studentForm } = useSelector(
+    (state: RootState) => state.studentAdmission
+  );
+
+  useEffect(() => {
+    if (studentId) {
+      dispatch(getStudentById(studentId));
+    }
+  }, [studentId]);
+
   const {
-    control,
-    handleSubmit,
-    formState: { errors },
+    control: admissionControl,
+    handleSubmit: handleAdmissionSubmit,
+    formState: { errors: admissionErrors },
     trigger,
+    reset,
   } = useForm<AdmissionFormData>({
     defaultValues: {
       firstName: "",
@@ -40,26 +57,22 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
       nationality: "Pakistani",
       religion: "Islam",
       bloodGroup: "",
-
       email: "",
       phone: "",
       address: "",
       city: "",
       postalCode: "",
       country: "Pakistan",
-
       admissionDate: "",
       previousSchool: "",
       previousClass: "",
       registrationNumber: "",
       isActive: true,
-
       fatherName: "",
       fatherOccupation: "",
       fatherPhone: "",
       motherName: "",
       guardianEmail: "",
-
       profileImageUrl: "",
       cnicNumber: "",
       birthCertificateNo: "",
@@ -67,9 +80,35 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
     },
   });
 
+  const {
+    control: feeControl,
+    handleSubmit: handleFeeSubmit,
+    formState: { errors: feeErrors },
+  } = useForm<FeeInfoData>({
+    defaultValues: {
+      admissionFee: 0,
+      tuitionFee: 0,
+      paymentMethod: "",
+      remarks: "",
+    },
+  });
+
+  useEffect(() => {
+    if (studentForm?.data) {
+      toast.info("Editing existing student...");
+
+      reset({
+        ...studentForm.data,
+      });
+
+      setStudentAdmitted(true);
+      setActiveStep(3);
+    }
+  }, [studentForm, reset]);
+
   const handleNext = async () => {
-    console.log("Active Step:", activeStep);
     let isValid = false;
+
     switch (activeStep) {
       case 0:
         isValid = await trigger([
@@ -99,7 +138,7 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
           "registrationNumber",
         ]);
         if (isValid) {
-          handleSubmit(onSubmit)();
+          handleAdmissionSubmit(onAdmissionSubmit)();
           return;
         }
         break;
@@ -114,22 +153,36 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
 
   const handleBack = () => setActiveStep((prev) => prev - 1);
 
-  const onSubmit = async (data: AdmissionFormData) => {
+  const onAdmissionSubmit = async (data: AdmissionFormData) => {
     try {
-      if (activeStep == steps.length - 2 && !studentAdmitted) {
+      data.activeStep = activeStep;
+
+      // Handle update or new admission
+      if (!studentAdmitted) {
         const result = await dispatch(admitStudent(data)).unwrap();
         if (result.isSuccess) {
           toast.success("Admission submitted successfully!");
           setStudentAdmitted(true);
+          setActiveStep((prev) => prev + 1);
         } else {
           toast.error(`Error submitting admission: ${result.message}`);
-          return;
         }
+      } else {
+        toast.info("Already admitted. Ready for fee submission.");
+        setActiveStep((prev) => prev + 1);
       }
-
-      setActiveStep((prev) => prev + 1);
     } catch (err: any) {
       toast.error(`Error submitting admission: ${err.message}`);
+    }
+  };
+
+  const onSubmitFee = async (data: FeeInfoData) => {
+    try {
+      console.log("Fee data submitted:", data);
+      toast.success("Fee information submitted.");
+      onClose();
+    } catch (err: any) {
+      toast.error("Error submitting fee information.");
     }
   };
 
@@ -143,46 +196,68 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
         ))}
       </Stepper>
 
-      <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-        {activeStep === 0 && (
-          <PersonalInfoStep control={control} errors={errors} />
-        )}
-        {activeStep === 1 && (
-          <ContactInfoStep control={control} errors={errors} />
-        )}
-        {activeStep === 2 && (
-          <GuardianInfoStep control={control} errors={errors} />
-        )}
-        {activeStep === 3 && (
-          <PreviousAcademia control={control} errors={errors} />
-        )}
+      {activeStep < 4 && (
+        <Box
+          component="form"
+          onSubmit={handleAdmissionSubmit(onAdmissionSubmit)}
+        >
+          {activeStep === 0 && (
+            <PersonalInfoStep
+              control={admissionControl}
+              errors={admissionErrors}
+            />
+          )}
+          {activeStep === 1 && (
+            <ContactInfoStep
+              control={admissionControl}
+              errors={admissionErrors}
+            />
+          )}
+          {activeStep === 2 && (
+            <GuardianInfoStep
+              control={admissionControl}
+              errors={admissionErrors}
+            />
+          )}
+          {activeStep === 3 && (
+            <PreviousAcademia
+              control={admissionControl}
+              errors={admissionErrors}
+            />
+          )}
 
-        {activeStep === 4 && <FeeInfoStep control={control} errors={errors} />}
-
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-          <Button
-            variant="outlined"
-            onClick={activeStep === 0 ? onClose : handleBack}
-            sx={{ px: 4 }}
-          >
-            {activeStep === 0 ? "Cancel" : "Back"}
-          </Button>
-
-          {activeStep < steps.length - 2 ? (
-            <Button variant="contained" onClick={handleNext} sx={{ px: 4 }}>
-              Next
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+            <Button
+              variant="outlined"
+              onClick={activeStep === 0 ? onClose : handleBack}
+              sx={{ px: 4 }}
+            >
+              {activeStep === 0 ? "Cancel" : "Back"}
             </Button>
-          ) : activeStep == steps.length - 2 ? (
             <Button variant="contained" onClick={handleNext} sx={{ px: 4 }}>
-              Admit Student
+              {activeStep === steps.length - 2
+                ? studentAdmitted
+                  ? "Continue"
+                  : "Admit Student"
+                : "Next"}
             </Button>
-          ) : (
+          </Box>
+        </Box>
+      )}
+
+      {activeStep === 4 && (
+        <Box component="form" onSubmit={handleFeeSubmit(onSubmitFee)}>
+          <FeeInfoStep control={feeControl} errors={feeErrors} />
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+            <Button variant="outlined" onClick={handleBack} sx={{ px: 4 }}>
+              Back
+            </Button>
             <Button variant="contained" type="submit" sx={{ px: 4 }}>
               Submit Admission
             </Button>
-          )}
+          </Box>
         </Box>
-      </Box>
+      )}
     </Paper>
   );
 };

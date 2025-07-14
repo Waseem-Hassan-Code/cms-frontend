@@ -1,10 +1,46 @@
 // src/pages/admissions/components/AdmissionGrid.tsx
-import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Box, Paper } from "@mui/material";
-import useMockAdmissions from "./types-hooks/data-hook";
+import { type GridColDef } from "@mui/x-data-grid";
+
+import { CustomDataGrid } from "../../components/custom-data-grid";
+import type { AppDispatch, RootState } from "../../../redux/store";
+
+import {
+  clearStudents,
+  setPageNumber,
+  setPageSize,
+  setStudentId,
+} from "../../../redux/student-admission/student-admission-slice";
+import { getStudents } from "../../../redux/student-admission/student-admission-thunks";
+import { convertUtcToLocal } from "../../../utilities/date-formatter";
 
 const AdmissionGrid = () => {
-  const { admissions, loading } = useMockAdmissions();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { students, loading, pageNumber, pageSize, searchString } = useSelector(
+    (state: RootState) => state.studentAdmission
+  );
+
+  useEffect(() => {
+    dispatch(getStudents({ pageNumber, pageSize, searchString }));
+
+    return () => {
+      dispatch(clearStudents());
+    };
+  }, [dispatch, pageNumber, pageSize, searchString]);
+
+  const rows =
+    students?.data?.map((student) => ({
+      id: student.id || "",
+      // registrationNumber: student.registrationNumber,
+      createdAt: student.createdAt,
+      dateOfBirth: student.dateOfBirth,
+      phone: student.phone,
+      fatherName: student.fatherName,
+      fullName: `${student.firstName || ""} ${student.lastName || ""}`.trim(),
+    })) || [];
 
   const columns: GridColDef[] = [
     {
@@ -16,32 +52,20 @@ const AdmissionGrid = () => {
       field: "fullName",
       headerName: "Name",
       width: 200,
-      valueGetter: (params: any) => {
-        if (!params?.row) return "";
-        return `${params.row.firstName || ""} ${
-          params.row.lastName || ""
-        }`.trim();
-      },
     },
     {
       field: "dateOfBirth",
       headerName: "DOB",
       width: 120,
       type: "date",
-      valueGetter: (params: any) => {
-        if (!params?.row?.dateOfBirth) return null;
-        return new Date(params.row.dateOfBirth);
-      },
+      valueFormatter: (params) => convertUtcToLocal(params),
     },
     {
-      field: "admissionDate",
+      field: "createdAt",
       headerName: "Admission Date",
       width: 150,
       type: "date",
-      valueGetter: (params: any) => {
-        if (!params?.row?.admissionDate) return null;
-        return new Date(params.row.admissionDate);
-      },
+      valueFormatter: (params) => convertUtcToLocal(params),
     },
     {
       field: "fatherName",
@@ -52,28 +76,6 @@ const AdmissionGrid = () => {
       field: "phone",
       headerName: "Contact",
       width: 150,
-    },
-    {
-      field: "status",
-      headerName: "Status",
-      width: 130,
-      renderCell: (params) => (
-        <Box
-          sx={{
-            px: 1.2,
-            py: 0.5,
-            borderRadius: 1,
-            backgroundColor:
-              params.value === "Active" ? "success.light" : "error.light",
-            color: params.value === "Active" ? "success.dark" : "error.dark",
-            textAlign: "center",
-            fontSize: "0.75rem",
-            fontWeight: 600,
-          }}
-        >
-          {params.value || "N/A"}
-        </Box>
-      ),
     },
   ];
 
@@ -87,53 +89,28 @@ const AdmissionGrid = () => {
       }}
     >
       <Box sx={{ width: "100%" }}>
-        <DataGrid
-          rows={admissions || []}
+        <CustomDataGrid
+          rows={rows}
           columns={columns}
-          autoHeight
-          pageSizeOptions={[5, 10, 20]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
-          }}
+          pageSizeOptions={[10, 20, 50, 100]}
+          serverSidePagination
+          totalRows={students?.totalRecords || 0}
           loading={loading}
-          disableColumnMenu
-          hideFooterSelectedRowCount
-          sx={{
-            bgcolor: "#fff",
-            borderRadius: 2,
-            border: "none",
-
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: "#1976d2",
-
-              fontWeight: "bold",
-              fontSize: "1rem",
-            },
-
-            "& .MuiDataGrid-columnHeaderTitle": {
-              fontWeight: "bold",
-            },
-
-            "& .MuiDataGrid-row": {
-              cursor: "pointer",
-              "&:hover": {
-                backgroundColor: "#e3f2fd",
+          getRowId={(row) => row.registrationNumber}
+          onRowClick={(params) => {
+            dispatch(setStudentId(params.row.id));
+          }}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                page: pageNumber - 1,
+                pageSize: pageSize,
               },
             },
-
-            "& .MuiDataGrid-cell": {
-              borderBottom: "1px solid #e0e0e0",
-              fontSize: "0.875rem",
-            },
-
-            "& .MuiDataGrid-row:nth-of-type(odd)": {
-              backgroundColor: "#fafafa",
-            },
-
-            "& .MuiDataGrid-footerContainer": {
-              backgroundColor: "#f0f0f0",
-              borderTop: "1px solid #e0e0e0",
-            },
+          }}
+          onPaginationModelChange={(model) => {
+            dispatch(setPageNumber(model.page + 1));
+            dispatch(setPageSize(model.pageSize));
           }}
         />
       </Box>
