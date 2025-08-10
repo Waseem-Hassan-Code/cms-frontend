@@ -34,7 +34,7 @@ const AdmissionGrid = () => {
   const rows =
     students?.data?.map((student) => ({
       id: student.id || "",
-      // registrationNumber: student.registrationNumber,
+      registrationNumber: student.registrationNumber,
       createdAt: student.createdAt,
       dateOfBirth: student.dateOfBirth,
       phone: student.phone,

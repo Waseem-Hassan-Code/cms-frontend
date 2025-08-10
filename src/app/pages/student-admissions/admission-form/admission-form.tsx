@@ -17,7 +17,8 @@ import {
 } from "../../../../redux/student-admission/student-admission-thunks";
 import PreviousAcademia from "./previous-academia";
 import { toast } from "sonner";
-import { formatDate } from "../../../../utilities/date-formatter";
+import { addFeeVoucher } from "../../../../redux/fee-details/fee-detail-thunk";
+import type { StudentFeeVoucher } from "../../../../models/fee-details";
 
 const steps = [
   "Personal Info",
@@ -86,9 +87,8 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
     formState: { errors: feeErrors },
   } = useForm<FeeInfoData>({
     defaultValues: {
-      admissionFee: 0,
+      selectedFeeTypes: [],
       tuitionFee: 0,
-      paymentMethod: "",
       remarks: "",
     },
   });
@@ -178,9 +178,24 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
 
   const onSubmitFee = async (data: FeeInfoData) => {
     try {
-      console.log("Fee data submitted:", data);
-      toast.success("Fee information submitted.");
-      onClose();
+      var obj: StudentFeeVoucher = {
+        studentId: studentId!,
+        feeVoucherItems: data.selectedFeeTypes,
+        tutionFee: data.tuitionFee,
+        remarks: data.remarks,
+      };
+
+      dispatch(addFeeVoucher(obj))
+        .unwrap()
+        .then((result) => {
+          if (result.isSuccess) {
+            onClose();
+            toast.success("Fee voucher added successfully!");
+          }
+        })
+        .catch((error) => {
+          toast.error(`Error adding fee voucher: ${error.message}`);
+        });
     } catch (err: any) {
       toast.error("Error submitting fee information.");
     }

@@ -41,9 +41,8 @@ export interface AdmissionFormData {
 }
 
 export type FeeInfoData = {
-  admissionFee: number;
+  selectedFeeTypes: [{ feeTypeId: string; feeAmount: number }];
   tuitionFee: number;
-  paymentMethod: string;
   remarks?: string;
 };
 
