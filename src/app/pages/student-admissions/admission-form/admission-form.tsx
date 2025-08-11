@@ -102,7 +102,7 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
       });
 
       setStudentAdmitted(true);
-      setActiveStep(3);
+      setActiveStep(studentForm.data.activeStep || 0);
     }
   }, [studentForm, reset]);
 
@@ -190,7 +190,7 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
         .then((result) => {
           if (result.isSuccess) {
             onClose();
-            toast.success("Fee voucher added successfully!");
+            toast.success(result.message);
           }
         })
         .catch((error) => {
@@ -204,8 +204,19 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
   return (
     <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
       <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
-        {steps.map((label) => (
-          <Step key={label}>
+        {steps.map((label, index) => (
+          <Step
+            key={label}
+            completed={index < activeStep}
+            onClick={() => setActiveStep(index)}
+            sx={{
+              cursor: "pointer",
+              "& .MuiStepLabel-label": {
+                color: activeStep === index ? "green" : "inherit",
+                fontWeight: activeStep === index ? "bold" : "normal",
+              },
+            }}
+          >
             <StepLabel>{label}</StepLabel>
           </Step>
         ))}
