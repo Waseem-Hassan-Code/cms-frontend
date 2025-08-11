@@ -22,6 +22,24 @@ export const getFeeTypes = createAsyncThunk<ApiResponse<FeeDetailsDto[]>, void>(
   }
 );
 
+export const getAdmissionVoucher = createAsyncThunk<
+  ApiResponse<StudentFeeVoucher>,
+  { id: string },
+  { rejectValue: string }
+>("FeeDetails/getAdmissionVoucher", async ({ id }, { rejectWithValue }) => {
+  try {
+    const response = await cms_base_api.get<ApiResponse<StudentFeeVoucher>>(
+      "Fee/get-admission-voucher",
+      { params: { id } }
+    );
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(
+      error.response?.data?.message || "Failed to fetch admission voucher"
+    );
+  }
+});
+
 export const addFeeVoucher = createAsyncThunk<
   ApiResponse<string>,
   StudentFeeVoucher,

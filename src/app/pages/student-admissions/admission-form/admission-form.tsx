@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { Box, Button, Stepper, Step, StepLabel, Paper } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import PersonalInfoStep from "./personal-info";
@@ -85,6 +85,7 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
     control: feeControl,
     handleSubmit: handleFeeSubmit,
     formState: { errors: feeErrors },
+    setValue,
   } = useForm<FeeInfoData>({
     defaultValues: {
       selectedFeeTypes: [],
@@ -273,7 +274,11 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
 
       {activeStep === 4 && (
         <Box component="form" onSubmit={handleFeeSubmit(onSubmitFee)}>
-          <FeeInfoStep control={feeControl} errors={feeErrors} />
+          <FeeInfoStep
+            setValue={setValue}
+            control={feeControl}
+            errors={feeErrors}
+          />
           <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
             <Button variant="outlined" onClick={handleBack} sx={{ px: 4 }}>
               Back

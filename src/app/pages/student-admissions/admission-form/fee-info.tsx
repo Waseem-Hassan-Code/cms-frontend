@@ -15,12 +15,16 @@ import { Controller, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../../../redux/store";
 import { useEffect } from "react";
-import { getFeeTypes } from "../../../../redux/fee-details/fee-detail-thunk";
+import {
+  getAdmissionVoucher,
+  getFeeTypes,
+} from "../../../../redux/fee-details/fee-detail-thunk";
 import { clearFeeTypes } from "../../../../redux/fee-details/fee-detail-slice";
 
 interface FeeInfoStepProps {
   control: any;
   errors: any;
+  setValue: any;
 }
 
 type FeeType = {
@@ -33,7 +37,7 @@ type FormValues = {
   remarks: string;
 };
 
-const FeeInfoStep = ({ control, errors }: FeeInfoStepProps) => {
+const FeeInfoStep = ({ control, errors, setValue }: FeeInfoStepProps) => {
   const selectedFees = useWatch<FormValues, "selectedFeeTypes">({
     control,
     name: "selectedFeeTypes",
@@ -46,19 +50,41 @@ const FeeInfoStep = ({ control, errors }: FeeInfoStepProps) => {
     defaultValue: 0,
   });
 
-  const { feeDetails } = useSelector((state: RootState) => state.feeDetails);
+  const { feeDetails, admissionVoucher } = useSelector(
+    (state: RootState) => state.feeDetails
+  );
   const dispatch = useDispatch<AppDispatch>();
+  const { studentId } = useSelector(
+    (state: RootState) => state.studentAdmission
+  );
 
   useEffect(() => {
     if (!feeDetails || feeDetails.length === 0) {
       dispatch(getFeeTypes());
+      dispatch(getAdmissionVoucher({ id: studentId! }));
     }
     return () => {
       dispatch(clearFeeTypes());
     };
   }, [dispatch]);
 
-  // Merge selected fees with full feeDetails
+  useEffect(() => {
+    if (admissionVoucher) {
+      const mappedSelectedFees: FeeType[] = (
+        admissionVoucher.feeVoucherItems || []
+      ).map((item) => ({
+        feeTypeId: item.feeTypeId,
+        feeAmount: item.feeAmount,
+      }));
+
+      setValue("selectedFeeTypes", mappedSelectedFees);
+
+      setValue("tuitionFee", admissionVoucher.tutionFee ?? 0);
+
+      setValue("remarks", admissionVoucher.remarks || "");
+    }
+  }, [admissionVoucher, setValue]);
+
   const selectedFeeDetails = (feeDetails || [])
     .filter((opt) => selectedFees.some((fee) => fee.feeTypeId === opt.id))
     .map((opt) => ({

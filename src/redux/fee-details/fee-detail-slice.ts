@@ -1,23 +1,41 @@
 import { createSlice } from "@reduxjs/toolkit";
-import type { FeeDetailsDto } from "../../models/fee-details";
-import { getFeeTypes, addFeeVoucher } from "./fee-detail-thunk";
+import type {
+  FeeDetailsDto,
+  StudentFeeVoucher,
+} from "../../models/fee-details";
+import {
+  getFeeTypes,
+  addFeeVoucher,
+  getAdmissionVoucher,
+} from "./fee-detail-thunk";
 
 export interface FeeDetailState {
   feeDetails: FeeDetailsDto[] | null;
   loading: boolean;
   error: string | null;
+
   addVoucherLoading: boolean;
   addVoucherError: string | null;
   lastAddedVoucherId: string | null;
+
+  // New state for admission voucher
+  admissionVoucher: StudentFeeVoucher | null;
+  admissionVoucherLoading: boolean;
+  admissionVoucherError: string | null;
 }
 
 const initialState: FeeDetailState = {
   feeDetails: null,
   loading: false,
   error: null,
+
   addVoucherLoading: false,
   addVoucherError: null,
   lastAddedVoucherId: null,
+
+  admissionVoucher: null,
+  admissionVoucherLoading: false,
+  admissionVoucherError: null,
 };
 
 export const feeDetailSlice = createSlice({
@@ -33,6 +51,11 @@ export const feeDetailSlice = createSlice({
       state.addVoucherLoading = false;
       state.addVoucherError = null;
       state.lastAddedVoucherId = null;
+    },
+    clearAdmissionVoucher: (state) => {
+      state.admissionVoucher = null;
+      state.admissionVoucherLoading = false;
+      state.admissionVoucherError = null;
     },
   },
   extraReducers: (builder) => {
@@ -64,10 +87,26 @@ export const feeDetailSlice = createSlice({
       .addCase(addFeeVoucher.rejected, (state, action) => {
         state.addVoucherLoading = false;
         state.addVoucherError = action.payload as string;
+      })
+
+      // ✅ Get Admission Voucher (new)
+      .addCase(getAdmissionVoucher.pending, (state) => {
+        state.admissionVoucherLoading = true;
+        state.admissionVoucherError = null;
+        state.admissionVoucher = null;
+      })
+      .addCase(getAdmissionVoucher.fulfilled, (state, action) => {
+        state.admissionVoucherLoading = false;
+        state.admissionVoucher = action.payload.data || null;
+      })
+      .addCase(getAdmissionVoucher.rejected, (state, action) => {
+        state.admissionVoucherLoading = false;
+        state.admissionVoucherError = action.payload as string;
       });
   },
 });
 
-export const { clearFeeTypes, clearVoucherStatus } = feeDetailSlice.actions;
+export const { clearFeeTypes, clearVoucherStatus, clearAdmissionVoucher } =
+  feeDetailSlice.actions;
 
 export default feeDetailSlice.reducer;
