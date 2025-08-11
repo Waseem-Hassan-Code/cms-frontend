@@ -42,6 +42,7 @@ export interface StudentAdmissionForm {
 
 export interface GetAdmittedStudentsDto {
   id: string;
+  registrationNumber: string;
   firstName: string;
   lastName: string;
   dateOfBirth: string;
