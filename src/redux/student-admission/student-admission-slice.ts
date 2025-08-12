@@ -7,9 +7,11 @@ import type {
 import type {
   GetAdmittedStudentsDto,
   StudentAdmissionForm,
+  StudentEnrollmentDto,
 } from "../../models/student-admission";
 import {
   admitStudent,
+  enrollStudent,
   getStudentById,
   getStudents,
 } from "./student-admission-thunks";
@@ -17,6 +19,7 @@ import type { set } from "react-hook-form";
 
 export interface StudentAdmissionState {
   admissionForm: ApiResponse<StudentAdmissionForm> | null;
+  enrollmentForm: ApiResponse<StudentEnrollmentDto> | null;
   admissionFormData: StudentAdmissionForm | null;
   students: ApiPaginatedResponse<GetAdmittedStudentsDto> | null;
   studentForm: ApiResponse<StudentAdmissionForm> | null;
@@ -30,6 +33,7 @@ export interface StudentAdmissionState {
 
 const initialState: StudentAdmissionState = {
   admissionForm: null,
+  enrollmentForm: null,
   loading: false,
   admissionFormData: null,
   studentForm: null,
@@ -90,10 +94,29 @@ export const studentAdmissionSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
+      //===================================================================
+
+      .addCase(enrollStudent.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        enrollStudent.fulfilled,
+        (state, action: PayloadAction<ApiResponse<StudentEnrollmentDto>>) => {
+          state.loading = false;
+          state.enrollmentForm = action.payload;
+        }
+      )
+      .addCase(enrollStudent.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      //===================================================================
       .addCase(getStudents.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
+
       .addCase(
         getStudents.fulfilled,
         (

@@ -8,19 +8,37 @@ import type {
 import type {
   GetAdmittedStudentsDto,
   StudentAdmissionForm,
+  StudentEnrollmentDto,
 } from "../../models/student-admission";
 import type { RootState } from "../store";
 
-// Submit the student form to API
 export const admitStudent = createAsyncThunk<
-  ApiResponse<StudentAdmissionForm>, // Response
-  StudentAdmissionForm, // Request body
+  ApiResponse<StudentAdmissionForm>,
+  StudentAdmissionForm,
   { state: RootState }
 >("studentAdmission/admitStudent", async (formData, { rejectWithValue }) => {
   try {
     const response = await cms_base_api.post<ApiResponse<StudentAdmissionForm>>(
       "Student/add-student",
-      formData // <-- send the body
+      formData
+    );
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(
+      error.response?.data?.message || "Failed to admit student"
+    );
+  }
+});
+
+export const enrollStudent = createAsyncThunk<
+  ApiResponse<StudentEnrollmentDto>,
+  StudentEnrollmentDto,
+  { state: RootState }
+>("studentAdmission/enrollStudent", async (formData, { rejectWithValue }) => {
+  try {
+    const response = await cms_base_api.post<ApiResponse<StudentEnrollmentDto>>(
+      "Student/enroll-student",
+      formData
     );
     return response.data;
   } catch (error: any) {

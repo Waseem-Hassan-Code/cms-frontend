@@ -1,8 +1,12 @@
 // src/pages/admissions/components/AdmissionGrid.tsx
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Box, Paper } from "@mui/material";
+import { Box, IconButton, Paper, Tooltip } from "@mui/material";
 import { type GridColDef } from "@mui/x-data-grid";
+import DeleteIcon from "@mui/icons-material/Delete";
+import PrintIcon from "@mui/icons-material/Print";
+import SchoolIcon from "@mui/icons-material/School";
+import EditIcon from "@mui/icons-material/Edit";
 
 import { CustomDataGrid } from "../../components/custom-data-grid";
 import type { AppDispatch, RootState } from "../../../redux/store";
@@ -14,7 +18,11 @@ import {
   setStudentId,
 } from "../../../redux/student-admission/student-admission-slice";
 import { getStudents } from "../../../redux/student-admission/student-admission-thunks";
-import { convertUtcToLocal } from "../../../utilities/date-formatter";
+import {
+  convertUtcToLocal,
+  formatDate,
+} from "../../../utilities/date-formatter";
+import { AdmitStudentDialog } from "../../components/admit-student";
 
 const AdmissionGrid = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -42,42 +50,127 @@ const AdmissionGrid = () => {
       fullName: `${student.firstName || ""} ${student.lastName || ""}`.trim(),
     })) || [];
 
+  const [admitOpen, setAdmitOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<{
+    id: string;
+    name: string;
+    regNo: string;
+  } | null>(null);
+
+  const actionColumn: GridColDef = {
+    field: "actions",
+    headerName: "Actions",
+    width: 140,
+    flex: 1,
+    sortable: false,
+    filterable: false,
+    renderCell: (params) => {
+      const { id, fullName, registrationNumber } = params.row;
+
+      return (
+        <Box sx={{ display: "flex", gap: 1 }}>
+          {/* Print */}
+          <Tooltip title="Print">
+            <IconButton
+              size="small"
+              color="primary"
+              onClick={() => {
+                window.print();
+              }}
+            >
+              <PrintIcon />
+            </IconButton>
+          </Tooltip>
+
+          {/* Admit */}
+          <Tooltip title="Admit Student">
+            <IconButton
+              size="small"
+              color="secondary"
+              onClick={() => {
+                setSelectedStudent({
+                  id,
+                  name: fullName,
+                  regNo: registrationNumber,
+                });
+                setAdmitOpen(true);
+              }}
+            >
+              <SchoolIcon />
+            </IconButton>
+          </Tooltip>
+
+          {/* Edit */}
+          <Tooltip title="Edit">
+            <IconButton
+              size="small"
+              color="info"
+              onClick={() => {
+                dispatch(setStudentId(id));
+                // open your edit screen here (navigate or show modal)
+              }}
+            >
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+
+          {/* Delete */}
+          <Tooltip title="Delete">
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => {
+                if (
+                  window.confirm(
+                    "Are you sure you want to delete this student?"
+                  )
+                ) {
+                  // Dispatch your delete logic here
+                }
+              }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      );
+    },
+  };
+
   const columns: GridColDef[] = [
     {
       field: "registrationNumber",
       headerName: "Reg No.",
-      width: 120,
+      flex: 0.7,
+      minWidth: 100,
     },
-    {
-      field: "fullName",
-      headerName: "Name",
-      width: 200,
-    },
+    { field: "fullName", headerName: "Name", flex: 0.7, minWidth: 150 },
     {
       field: "dateOfBirth",
       headerName: "DOB",
-      width: 120,
+      flex: 0.5,
+      minWidth: 120,
       type: "date",
-      valueFormatter: (params) => convertUtcToLocal(params),
+      valueFormatter: (params) => formatDate(params),
     },
     {
       field: "createdAt",
       headerName: "Admission Date",
-      width: 150,
+      flex: 0.7,
+      minWidth: 120,
       type: "date",
       valueFormatter: (params) => convertUtcToLocal(params),
     },
     {
       field: "fatherName",
       headerName: "Father's Name",
-      width: 200,
+      flex: 0.7,
+      minWidth: 150,
     },
-    {
-      field: "phone",
-      headerName: "Contact",
-      width: 150,
-    },
+    { field: "phone", headerName: "Contact", flex: 0.7, minWidth: 120 },
   ];
+
+  const columnsWithActions = [...columns, actionColumn];
 
   return (
     <Paper
@@ -91,15 +184,15 @@ const AdmissionGrid = () => {
       <Box sx={{ width: "100%" }}>
         <CustomDataGrid
           rows={rows}
-          columns={columns}
+          columns={columnsWithActions}
           pageSizeOptions={[10, 20, 50, 100]}
           serverSidePagination
           totalRows={students?.totalRecords || 0}
           loading={loading}
           getRowId={(row) => row.registrationNumber}
-          onRowClick={(params) => {
-            dispatch(setStudentId(params.row.id));
-          }}
+          // onRowClick={(params) => {
+          //   dispatch(setStudentId(params.row.id));
+          // }}
           initialState={{
             pagination: {
               paginationModel: {
@@ -114,6 +207,20 @@ const AdmissionGrid = () => {
           }}
         />
       </Box>
+
+      {selectedStudent && (
+        <AdmitStudentDialog
+          open={admitOpen}
+          onClose={() => setAdmitOpen(false)}
+          studentId={selectedStudent.id}
+          studentName={selectedStudent.name}
+          registrationNumber={selectedStudent.regNo}
+          onEnrollSuccess={() => {
+            setAdmitOpen(false);
+            dispatch(getStudents({ pageNumber, pageSize, searchString }));
+          }}
+        />
+      )}
     </Paper>
   );
 };

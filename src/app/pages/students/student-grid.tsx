@@ -1,30 +1,105 @@
-// src/pages/students/components/StudentGrid.tsx
+import { Box, Paper, Avatar } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../../redux/store";
+import { useEffect } from "react";
 
+import { getEnrolledStudents } from "../../../redux/enrolled-students/enrolled-student-thunk";
 import {
-  DataGrid,
-  type GridColDef,
-  type GridRowParams,
-} from "@mui/x-data-grid";
-import { Box, Paper } from "@mui/material";
-import type { Filters, Student } from "./type-hooks/type";
-import useMockStudents from "./type-hooks/hooks";
+  clearStudents,
+  setPageNumber,
+  setPageSize,
+} from "../../../redux/enrolled-students/enrolled-student-slice";
 
-interface StudentGridProps {
-  filters: Filters;
-  onRowClick: (student: Student) => void;
-}
+import { CustomDataGrid } from "../../components/custom-data-grid";
+import { getInitials, stringToColor } from "../../../utilities/avatar-helpers";
 
-const StudentGrid = ({ filters, onRowClick }: StudentGridProps) => {
-  const { students, loading } = useMockStudents(filters);
+const StudentGrid = () => {
+  const dispatch = useDispatch<AppDispatch>();
 
-  const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "name", headerName: "Name", width: 200 },
-    { field: "class", headerName: "Class", width: 120 },
-    { field: "section", headerName: "Section", width: 100 },
-    { field: "rollNumber", headerName: "Roll No.", width: 100 },
-    { field: "fatherName", headerName: "Father's Name", width: 200 },
-    { field: "contactNumber", headerName: "Contact", width: 150 },
+  const {
+    classId,
+    sectionId,
+    pageSize,
+    pageNumber,
+    students,
+    searchString,
+    loading,
+  } = useSelector((state: RootState) => state.enrolledStudents);
+
+  const rows =
+    students?.data?.map((student) => ({
+      id: student.id || "",
+      regNumber: student.regNumber,
+      fullName: student.fullName,
+      fatherName: student.fatherName,
+      class: student.class,
+      section: student.section,
+      rollNumber: student.rollNumber,
+    })) || [];
+
+  useEffect(() => {
+    dispatch(
+      getEnrolledStudents({
+        pageNumber,
+        pageSize,
+        searchString,
+        classId,
+        sectionId,
+      })
+    );
+    return () => {
+      dispatch(clearStudents());
+    };
+  }, [dispatch, pageNumber, pageSize, searchString, classId, sectionId]);
+
+  const avatarColumn = {
+    field: "avatar",
+    headerName: "",
+    width: 60,
+    sortable: false,
+    filterable: false,
+    align: "center",
+    headerAlign: "center",
+    renderCell: (params: any) => {
+      const { fullName } = params.row;
+      const initials = getInitials(fullName);
+      const color = stringToColor(fullName);
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <Avatar
+            sx={{
+              bgcolor: color,
+              color: "#fff",
+              fontWeight: 500,
+              width: 35,
+              height: 35,
+              fontSize: 16,
+              boxShadow: 2,
+            }}
+          >
+            {initials}
+          </Avatar>
+        </Box>
+      );
+    },
+  };
+
+  const columns = [
+    avatarColumn,
+    { field: "regNumber", headerName: "Reg No.", flex: 1 },
+    { field: "fullName", headerName: "Name", flex: 2 },
+    { field: "fatherName", headerName: "Father's Name", flex: 2 },
+    { field: "rollNumber", headerName: "Roll Number", flex: 2 },
+    { field: "class", headerName: "Class", flex: 2 },
+    { field: "section", headerName: "Section", flex: 2 },
   ];
 
   return (
@@ -37,56 +112,24 @@ const StudentGrid = ({ filters, onRowClick }: StudentGridProps) => {
       }}
     >
       <Box sx={{ width: "100%" }}>
-        <DataGrid
-          rows={students}
+        <CustomDataGrid
+          rows={rows}
           columns={columns}
-          autoHeight
-          disableColumnMenu
-          hideFooterSelectedRowCount
-          pageSizeOptions={[5, 10, 20]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 8, page: 0 } },
-          }}
           loading={loading}
-          onRowClick={(params: GridRowParams) =>
-            onRowClick(params.row as Student)
-          }
-          sx={{
-            bgcolor: "#ffffff",
-            borderRadius: 2,
-            border: "none",
-
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: "#1976d2",
-              color: "#fff",
-              fontWeight: "bold",
-              fontSize: "1rem",
-            },
-
-            "& .MuiDataGrid-columnHeaderTitle": {
-              fontWeight: "bold",
-            },
-
-            "& .MuiDataGrid-row": {
-              cursor: "pointer",
-              "&:hover": {
-                backgroundColor: "#e3f2fd",
+          pageSizeOptions={[10, 20, 50, 100]}
+          serverSidePagination
+          totalRows={students?.totalRecords || 0}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                page: pageNumber - 1,
+                pageSize: pageSize,
               },
             },
-
-            "& .MuiDataGrid-cell": {
-              borderBottom: "1px solid #e0e0e0",
-              fontSize: "0.875rem",
-            },
-
-            "& .MuiDataGrid-row:nth-of-type(odd)": {
-              backgroundColor: "#fafafa",
-            },
-
-            "& .MuiDataGrid-footerContainer": {
-              backgroundColor: "#f0f0f0",
-              borderTop: "1px solid #e0e0e0",
-            },
+          }}
+          onPaginationModelChange={(model) => {
+            dispatch(setPageNumber(model.page + 1));
+            dispatch(setPageSize(model.pageSize));
           }}
         />
       </Box>

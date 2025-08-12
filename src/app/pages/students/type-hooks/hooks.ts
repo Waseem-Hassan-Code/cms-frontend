@@ -3,8 +3,8 @@ import { useState, useEffect } from "react";
 import type { Filters, Student } from "./type";
 
 const useMockStudents = (filters: Filters) => {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [students_, setStudents] = useState<Student[]>([]);
+  const [loading_, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
@@ -39,7 +39,7 @@ const useMockStudents = (filters: Filters) => {
     }, 500);
   }, [filters]);
 
-  return { students, loading };
+  return { students_, loading_ };
 };
 
 const generateMockStudents = (): Student[] => {

@@ -34,10 +34,19 @@ export interface StudentAdmissionForm {
   profileImageUrl: string;
   cnicNumber: string;
   birthCertificateNo: string;
+  isEnrolled?: boolean;
 
   // Metadata
   remarks: string;
   activeStep: number;
+}
+
+export interface StudentEnrollmentDto {
+  id?: string | null;
+  studentId: string;
+  classId: string;
+  sectionId: string;
+  isActive: boolean;
 }
 
 export interface GetAdmittedStudentsDto {

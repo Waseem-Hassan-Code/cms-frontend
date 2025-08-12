@@ -1,7 +1,8 @@
 export interface FeeDetailsDto {
-  id: string;
+  id?: string;
   feeType: string;
   feeAmount: number;
+  isDiscountable: boolean;
 }
 
 export interface FeeVoucherItem {
