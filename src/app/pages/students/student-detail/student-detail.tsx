@@ -35,7 +35,7 @@ const StudentDetail = ({ student, onBack }: StudentDetailProps) => {
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 4 }}>
-          <StudentFeePanel studentId={student.id} />
+          <StudentFeePanel  />
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
           <StudentEvaluationPanel />
