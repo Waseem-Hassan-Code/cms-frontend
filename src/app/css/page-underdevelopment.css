@@ -1,0 +1,43 @@
+.dashboard-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+  background: linear-gradient(to right, #f8f9fa, #e9ecef);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.animated-message {
+  text-align: center;
+  animation: fadeInUp 1.2s ease-out;
+  background-color: #ffffff;
+  padding: 30px 50px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid #dee2e6;
+}
+
+.animated-message span {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.animated-message p {
+  font-size: 1.3rem;
+  color: #495057;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
