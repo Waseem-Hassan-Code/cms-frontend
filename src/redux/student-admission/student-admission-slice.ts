@@ -15,7 +15,6 @@ import {
   getStudentById,
   getStudents,
 } from "./student-admission-thunks";
-import type { set } from "react-hook-form";
 
 export interface StudentAdmissionState {
   admissionForm: ApiResponse<StudentAdmissionForm> | null;

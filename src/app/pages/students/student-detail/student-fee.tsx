@@ -2,10 +2,6 @@
 import { Box, Typography, Paper, Divider, Button } from "@mui/material";
 import PaymentsIcon from "@mui/icons-material/Payments";
 
-interface StudentFeePanelProps {
-  studentId: string;
-}
-
 const StudentFeePanel = ({ studentId }: StudentFeePanelProps) => {
   const feeData = {
     totalFee: 12000,

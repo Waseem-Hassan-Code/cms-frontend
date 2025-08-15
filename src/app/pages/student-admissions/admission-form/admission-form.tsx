@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { set, useForm } from "react-hook-form";
+import {useForm } from "react-hook-form";
 import { Box, Button, Stepper, Step, StepLabel, Paper } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import PersonalInfoStep from "./personal-info";
