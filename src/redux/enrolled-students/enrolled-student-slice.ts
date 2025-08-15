@@ -1,10 +1,17 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { ApiPaginatedResponse } from "../../models/api-response";
-import type { EnrolledStudentDetailDto } from "../../models/enrolled-students";
-import { getEnrolledStudents } from "./enrolled-student-thunk";
+import type {
+  EnrolledStudentDetailDto,
+  StudentDetailsDto,
+} from "../../models/enrolled-students";
+import {
+  getEnrolledStudents,
+  getStudentDetailByStudentId,
+} from "./enrolled-student-thunk";
 
 interface StudentEnrollmentState {
   students: ApiPaginatedResponse<EnrolledStudentDetailDto> | null;
+  studentDetails: StudentDetailsDto | null;
   loading: boolean;
   error: string | null;
   pageNumber: number;
@@ -12,10 +19,12 @@ interface StudentEnrollmentState {
   searchString: string;
   classId?: string;
   sectionId?: string;
+  selectedStudentId?: string;
 }
 
 const initialState: StudentEnrollmentState = {
   students: null,
+  studentDetails: null,
   loading: false,
   error: null,
   pageNumber: 1,
@@ -23,6 +32,7 @@ const initialState: StudentEnrollmentState = {
   searchString: "",
   classId: "",
   sectionId: "",
+  selectedStudentId: "",
 };
 
 const studentEnrollmentSlice = createSlice({
@@ -48,6 +58,12 @@ const studentEnrollmentSlice = createSlice({
       state.students = null;
       state.error = null;
     },
+    setSelectedStudentId(state, action: PayloadAction<string | undefined>) {
+      state.selectedStudentId = action.payload;
+    },
+    clearStudentDetail(state) {
+      state.studentDetails = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -64,6 +80,21 @@ const studentEnrollmentSlice = createSlice({
         state.error =
           (action.payload as string) || "Failed to fetch enrolled students";
       });
+
+    builder
+      .addCase(getStudentDetailByStudentId.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getStudentDetailByStudentId.fulfilled, (state, action) => {
+        state.loading = false;
+        state.studentDetails = action.payload.data;
+      })
+      .addCase(getStudentDetailByStudentId.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          (action.payload as string) || "Failed to fetch student details";
+      });
   },
 });
 
@@ -74,6 +105,8 @@ export const {
   setClassId,
   setSectionId,
   clearStudents,
+  setSelectedStudentId,
+  clearStudentDetail,
 } = studentEnrollmentSlice.actions;
 
 export default studentEnrollmentSlice.reducer;

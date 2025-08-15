@@ -20,7 +20,7 @@ import {
 import { getStudents } from "../../../redux/student-admission/student-admission-thunks";
 import {
   convertUtcToLocal,
-  formatDate,
+  formatDateWithoutTime,
 } from "../../../utilities/date-formatter";
 import { AdmitStudentDialog } from "../../components/admit-student";
 
@@ -151,7 +151,7 @@ const AdmissionGrid = () => {
       flex: 0.5,
       minWidth: 120,
       type: "date",
-      valueFormatter: (params) => formatDate(params),
+      valueFormatter: (params) => formatDateWithoutTime(params),
     },
     {
       field: "createdAt",

@@ -14,7 +14,7 @@ export function convertUtcToLocal(utcDateString: any) {
   return localTime;
 }
 
-export function formatDate(
+export function formatDateWithoutTime(
   date: Date | string | undefined | null,
   format: string = "DD/MM/YYYY"
 ): string {

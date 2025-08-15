@@ -1,21 +1,36 @@
-// src/pages/students/StudentPage.tsx
-import { useState } from "react";
 import { Box, Container } from "@mui/material";
 import StudentGrid from "./student-grid";
 import StudentDetail from "./student-detail/student-detail";
-import type { Student } from "./type-hooks/type";
 import StudentFilters from "./student-filters";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../../redux/store";
+import {
+  clearStudentDetail,
+  setSelectedStudentId,
+} from "../../../redux/enrolled-students/enrolled-student-slice";
+import { useEffect } from "react";
+import { getStudentDetailByStudentId } from "../../../redux/enrolled-students/enrolled-student-thunk";
 
 const StudentPage = () => {
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const { selectedStudentId, studentDetails, loading } = useSelector(
+    (state: RootState) => state.enrolledStudents
+  );
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    dispatch(getStudentDetailByStudentId({ id: selectedStudentId! }));
+    return () => {
+      dispatch(clearStudentDetail());
+    };
+  }, [selectedStudentId]);
 
   const handleBackClick = () => {
-    setSelectedStudent(null);
+    dispatch(setSelectedStudentId(""));
   };
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      {!selectedStudent ? (
+      {!selectedStudentId ? (
         <>
           <StudentFilters />
           <Box sx={{ mt: 3 }}>
@@ -23,7 +38,11 @@ const StudentPage = () => {
           </Box>
         </>
       ) : (
-        <StudentDetail student={selectedStudent} onBack={handleBackClick} />
+        <StudentDetail
+          student={studentDetails!}
+          isLoading={loading}
+          onBack={handleBackClick}
+        />
       )}
     </Container>
   );

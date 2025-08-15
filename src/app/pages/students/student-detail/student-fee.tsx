@@ -7,7 +7,6 @@ interface StudentFeePanelProps {
 }
 
 const StudentFeePanel = ({ studentId }: StudentFeePanelProps) => {
-  // In a real app, you would fetch fee data based on studentId
   const feeData = {
     totalFee: 12000,
     paid: 8000,

@@ -4,8 +4,12 @@ import type {
   ApiPaginatedResponse,
   ApiResponse,
 } from "../../models/api-response";
-import type { EnrolledStudentDetailDto } from "../../models/enrolled-students";
+import type {
+  EnrolledStudentDetailDto,
+  StudentDetailsDto,
+} from "../../models/enrolled-students";
 import { cms_base_api } from "../../app/middleware/cms-base-api";
+import type { StudentFeeVoucher } from "../../models/fee-details";
 
 export const getEnrolledStudents = createAsyncThunk<
   ApiResponse<ApiPaginatedResponse<EnrolledStudentDetailDto>>,
@@ -39,6 +43,27 @@ export const getEnrolledStudents = createAsyncThunk<
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch enrolled students"
+      );
+    }
+  }
+);
+
+export const getStudentDetailByStudentId = createAsyncThunk<
+  ApiResponse<StudentDetailsDto>,
+  { id: string },
+  { rejectValue: string }
+>(
+  "enrolledStudents/getEnrolledStudentsById",
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const response = await cms_base_api.get<ApiResponse<StudentDetailsDto>>(
+        "/EnrolledStudent/get-enrolled-student-by-id",
+        { params: { studentId: id } }
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch admission voucher"
       );
     }
   }

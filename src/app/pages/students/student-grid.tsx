@@ -8,6 +8,7 @@ import {
   clearStudents,
   setPageNumber,
   setPageSize,
+  setSelectedStudentId,
 } from "../../../redux/enrolled-students/enrolled-student-slice";
 
 import { CustomDataGrid } from "../../components/custom-data-grid";
@@ -119,6 +120,7 @@ const StudentGrid = () => {
           pageSizeOptions={[10, 20, 50, 100]}
           serverSidePagination
           totalRows={students?.totalRecords || 0}
+          onRowClick={(params) => dispatch(setSelectedStudentId(params.row.id))}
           initialState={{
             pagination: {
               paginationModel: {

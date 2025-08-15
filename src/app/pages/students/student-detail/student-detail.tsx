@@ -1,19 +1,26 @@
-// src/pages/students/components/StudentDetail.tsx
-import { Button, Container, Paper, Grid, Typography } from "@mui/material";
-
+import {
+  Button,
+  Container,
+  Paper,
+  Grid,
+  Typography,
+  Skeleton,
+} from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import type { Student } from "../type-hooks/type";
-import StudentBasicInfo from "./student-basic-info";
 import StudentFeePanel from "./student-fee";
 import StudentEvaluationPanel from "./student-evaluation";
 import StudentExamResultsPanel from "./student-result";
+import StudentBasicInfo from "./student-basic-info";
+import type { StudentDetailsDto } from "../../../../models/enrolled-students";
+import { mapStudentDetailsToBasicInfo } from "../type-hooks/hooks";
 
 interface StudentDetailProps {
-  student: Student;
+  student: StudentDetailsDto | null;
   onBack: () => void;
+  isLoading: boolean;
 }
 
-const StudentDetail = ({ student, onBack }: StudentDetailProps) => {
+const StudentDetail = ({ student, onBack, isLoading }: StudentDetailProps) => {
   return (
     <Container maxWidth="xl">
       <Button startIcon={<ArrowBackIcon />} onClick={onBack} sx={{ mb: 2 }}>
@@ -30,19 +37,54 @@ const StudentDetail = ({ student, onBack }: StudentDetailProps) => {
       </Typography>
 
       <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-        <StudentBasicInfo student={student} />
+        {isLoading ? (
+          <>
+            <Skeleton variant="text" width="50%" height={40} sx={{ mb: 2 }} />
+            <Skeleton
+              variant="rectangular"
+              height={100}
+              sx={{ borderRadius: 2 }}
+            />
+          </>
+        ) : student ? (
+          <StudentBasicInfo student={mapStudentDetailsToBasicInfo(student)} />
+        ) : (
+          <Typography color="text.secondary">No student data found.</Typography>
+        )}
       </Paper>
 
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <StudentFeePanel studentId={student.id} />
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <StudentEvaluationPanel />
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <StudentExamResultsPanel />
-        </Grid>
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <Grid size={{ xs: 12, md: 4 }} key={i}>
+              <Paper elevation={1} sx={{ p: 2, borderRadius: 2 }}>
+                <Skeleton
+                  variant="text"
+                  width="80%"
+                  height={30}
+                  sx={{ mb: 2 }}
+                />
+                <Skeleton
+                  variant="rectangular"
+                  height={120}
+                  sx={{ borderRadius: 2 }}
+                />
+              </Paper>
+            </Grid>
+          ))
+        ) : student ? (
+          <>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <StudentFeePanel studentId={student.id} />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <StudentEvaluationPanel />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <StudentExamResultsPanel />
+            </Grid>
+          </>
+        ) : null}
       </Grid>
     </Container>
   );
