@@ -48,7 +48,7 @@ const PreviousAcademia = ({ control, errors }: PreviousAcademiaProps) => {
             <Controller
               name="previousSchool"
               control={control}
-              rules={{ required: "Previous school is required" }}
+              // rules={{ required: "Previous school is required" }}
               render={({ field }) => (
                 <TextField
                   {...field}
@@ -64,7 +64,7 @@ const PreviousAcademia = ({ control, errors }: PreviousAcademiaProps) => {
             <Controller
               name="previousClass"
               control={control}
-              rules={{ required: "Previous class is required" }}
+              // rules={{ required: "Previous class is required" }}
               render={({ field }) => (
                 <TextField
                   {...field}
@@ -80,7 +80,7 @@ const PreviousAcademia = ({ control, errors }: PreviousAcademiaProps) => {
             <Controller
               name="registrationNumber"
               control={control}
-              rules={{ required: "Registration number is required" }}
+              disabled
               render={({ field }) => (
                 <TextField
                   {...field}

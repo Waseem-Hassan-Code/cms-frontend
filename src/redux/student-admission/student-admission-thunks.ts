@@ -11,6 +11,7 @@ import type {
   StudentEnrollmentDto,
 } from "../../models/student-admission";
 import type { RootState } from "../store";
+import type { VoucherToPdfDto } from "../../models/student-admission-voucher";
 
 export const admitStudent = createAsyncThunk<
   ApiResponse<StudentAdmissionForm>,
@@ -81,6 +82,23 @@ export const getStudentById = createAsyncThunk<
       `/Student/get-student-by-id?id=${id}`
     );
     return response.data;
+  } catch (error: any) {
+    return rejectWithValue(
+      error.response?.data?.message || "Failed to fetch student details"
+    );
+  }
+});
+
+export const getStudentVoucher = createAsyncThunk<
+  ApiResponse<VoucherToPdfDto>,
+  string,
+  { state: RootState }
+>("studentAdmission/getStudentVoucher", async (id, { rejectWithValue }) => {
+  try {
+    const response = await cms_base_api.get<ApiResponse<VoucherToPdfDto>>(
+      `/Student/get-student-voucher-for-pdf?id=${id}`
+    );
+    return response.data; // returning the whole ApiResponse
   } catch (error: any) {
     return rejectWithValue(
       error.response?.data?.message || "Failed to fetch student details"

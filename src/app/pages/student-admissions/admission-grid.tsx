@@ -17,19 +17,29 @@ import {
   setPageSize,
   setStudentId,
 } from "../../../redux/student-admission/student-admission-slice";
-import { getStudents } from "../../../redux/student-admission/student-admission-thunks";
+import {
+  getStudents,
+  getStudentVoucher,
+} from "../../../redux/student-admission/student-admission-thunks";
 import {
   convertUtcToLocal,
   formatDateWithoutTime,
 } from "../../../utilities/date-formatter";
 import { AdmitStudentDialog } from "../../components/admit-student";
+import { generateFeeVoucherPdf } from "../../../utilities/voucher-pdf";
+import { toast } from "sonner";
 
 const AdmissionGrid = () => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const { students, loading, pageNumber, pageSize, searchString } = useSelector(
-    (state: RootState) => state.studentAdmission
-  );
+  const {
+    students,
+    loading,
+    pageNumber,
+    pageSize,
+    searchString,
+    studentVoucher,
+  } = useSelector((state: RootState) => state.studentAdmission);
 
   useEffect(() => {
     dispatch(getStudents({ pageNumber, pageSize, searchString }));
@@ -38,6 +48,16 @@ const AdmissionGrid = () => {
       dispatch(clearStudents());
     };
   }, [dispatch, pageNumber, pageSize, searchString]);
+
+  const handlePrintClick = (id: string) => {
+    dispatch(getStudentVoucher(id)).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        generateFeeVoucherPdf(studentVoucher?.data!);
+      } else {
+        toast.error("Failed to generate fee voucher");
+      }
+    });
+  };
 
   const rows =
     students?.data?.map((student) => ({
@@ -75,7 +95,7 @@ const AdmissionGrid = () => {
               size="small"
               color="primary"
               onClick={() => {
-                window.print();
+                handlePrintClick(id);
               }}
             >
               <PrintIcon />

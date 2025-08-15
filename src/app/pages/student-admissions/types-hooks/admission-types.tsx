@@ -3,7 +3,7 @@ export interface AdmissionFormData {
   firstName: string;
   lastName: string;
   gender: string;
-  dateOfBirth: string; // use string to represent DateTime (ISO string)
+  dateOfBirth: Date; // use string to represent DateTime (ISO string)
   nationality: string;
   religion: string;
   bloodGroup: string;
@@ -17,7 +17,7 @@ export interface AdmissionFormData {
   country: string; // default in C# was "Pakistan"
 
   // Admission Details
-  admissionDate: string; // use string to represent DateTime
+  admissionDate: Date; // use string to represent DateTime
   previousSchool: string;
   previousClass: string;
   registrationNumber: string;
@@ -43,6 +43,8 @@ export interface AdmissionFormData {
 export type FeeInfoData = {
   selectedFeeTypes: [{ feeTypeId: string; feeAmount: number }];
   tuitionFee: number;
+  dueDate: Date | null;
+  voucherMonth: Date | null;
   remarks?: string;
 };
 

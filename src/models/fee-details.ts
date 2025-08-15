@@ -13,6 +13,8 @@ export interface FeeVoucherItem {
 export interface StudentFeeVoucher {
   studentId: string;
   feeVoucherItems: FeeVoucherItem[];
+  dueDate: Date | null;
+  voucherMonth: Date | null;
   tutionFee?: number;
   remarks?: string;
 }

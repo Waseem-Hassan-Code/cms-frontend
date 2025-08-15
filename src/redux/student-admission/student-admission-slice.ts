@@ -14,7 +14,9 @@ import {
   enrollStudent,
   getStudentById,
   getStudents,
+  getStudentVoucher,
 } from "./student-admission-thunks";
+import type { VoucherToPdfDto } from "../../models/student-admission-voucher";
 
 export interface StudentAdmissionState {
   admissionForm: ApiResponse<StudentAdmissionForm> | null;
@@ -22,6 +24,7 @@ export interface StudentAdmissionState {
   admissionFormData: StudentAdmissionForm | null;
   students: ApiPaginatedResponse<GetAdmittedStudentsDto> | null;
   studentForm: ApiResponse<StudentAdmissionForm> | null;
+  studentVoucher: ApiResponse<VoucherToPdfDto> | null;
   loading: boolean;
   error: string | null;
   pageNumber: number;
@@ -36,6 +39,7 @@ const initialState: StudentAdmissionState = {
   loading: false,
   admissionFormData: null,
   studentForm: null,
+  studentVoucher: null,
   students: null,
   error: null,
   pageNumber: 1,
@@ -129,10 +133,21 @@ export const studentAdmissionSlice = createSlice({
           state.error = null;
         }
       )
-      .addCase(getStudents.rejected, (state, action) => {
+      //===================================================================
+      .addCase(
+        getStudentVoucher.fulfilled,
+        (state, action: PayloadAction<ApiResponse<VoucherToPdfDto>>) => {
+          state.loading = false;
+          state.studentVoucher = action.payload; // full ApiResponse
+          state.error = null;
+        }
+      )
+      .addCase(getStudentVoucher.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
+
+      //===================================================================
       .addCase(getStudentById.pending, (state) => {
         state.loading = true;
         state.error = null;

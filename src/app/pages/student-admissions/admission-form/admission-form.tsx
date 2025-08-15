@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import {useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Box, Button, Stepper, Step, StepLabel, Paper } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import PersonalInfoStep from "./personal-info";
@@ -54,7 +54,7 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
       firstName: "",
       lastName: "",
       gender: "Female",
-      dateOfBirth: "",
+      dateOfBirth: new Date(),
       nationality: "Pakistani",
       religion: "Islam",
       bloodGroup: "",
@@ -64,7 +64,7 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
       city: "",
       postalCode: "",
       country: "Pakistan",
-      admissionDate: "",
+      admissionDate: new Date(),
       previousSchool: "",
       previousClass: "",
       registrationNumber: "",
@@ -90,6 +90,8 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
     defaultValues: {
       selectedFeeTypes: [],
       tuitionFee: 0,
+      dueDate: new Date(),
+      voucherMonth: new Date(),
       remarks: "",
     },
   });
@@ -98,10 +100,18 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
     if (studentForm?.data) {
       toast.info("Editing existing student...");
 
-      reset({
+      // Convert date strings to Date objects
+      const patchedData: AdmissionFormData = {
         ...studentForm.data,
-      });
+        dateOfBirth: studentForm.data.dateOfBirth
+          ? new Date(studentForm.data.dateOfBirth)
+          : new Date(),
+        admissionDate: studentForm.data.admissionDate
+          ? new Date(studentForm.data.admissionDate)
+          : new Date(),
+      };
 
+      reset(patchedData);
       setStudentAdmitted(true);
       setActiveStep(studentForm.data.activeStep || 0);
     }
@@ -181,6 +191,8 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
     try {
       var obj: StudentFeeVoucher = {
         studentId: studentId!,
+        dueDate: data.dueDate,
+        voucherMonth: data.voucherMonth,
         feeVoucherItems: data.selectedFeeTypes,
         tutionFee: data.tuitionFee,
         remarks: data.remarks,
