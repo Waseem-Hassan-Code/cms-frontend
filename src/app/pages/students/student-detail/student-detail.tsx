@@ -75,13 +75,16 @@ const StudentDetail = ({ student, onBack, isLoading }: StudentDetailProps) => {
         ) : student ? (
           <>
             <Grid size={{ xs: 12, md: 4 }}>
-              <StudentFeePanel studentId={student.id} />
+              <StudentFeePanel
+                studentId={student.id}
+                fee={student.studentFeeInfo}
+              />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <StudentEvaluationPanel />
+              <StudentEvaluationPanel studentId={student.id} />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <StudentExamResultsPanel />
+              <StudentExamResultsPanel studentId={student.id} />
             </Grid>
           </>
         ) : null}

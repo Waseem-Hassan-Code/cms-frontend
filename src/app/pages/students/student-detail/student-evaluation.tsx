@@ -1,7 +1,14 @@
 import { Box, Typography, Paper, Divider, Button } from "@mui/material";
 import AssessmentIcon from "@mui/icons-material/Assessment";
+import { useNavigate } from "react-router-dom";
 
-export default function StudentEvaluationPanel() {
+interface StudentEvaluationProps {
+  studentId: string;
+}
+
+export default function StudentEvaluationPanel({
+  studentId,
+}: StudentEvaluationProps) {
   const evaluationData = {
     averageGrade: "B+",
     attendance: "92%",
@@ -10,6 +17,7 @@ export default function StudentEvaluationPanel() {
     status: "In Progress",
   };
 
+  const navigate = useNavigate();
   return (
     <Paper elevation={2} sx={{ p: 2, height: "100%", borderRadius: 2 }}>
       <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -55,7 +63,12 @@ export default function StudentEvaluationPanel() {
         Status: {evaluationData.status}
       </Typography>
 
-      <Button variant="outlined" size="small" fullWidth>
+      <Button
+        onClick={() => navigate(`/students/${studentId}/evaluation`)}
+        variant="outlined"
+        size="small"
+        fullWidth
+      >
         View Full Report
       </Button>
     </Paper>

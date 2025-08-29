@@ -9,6 +9,10 @@ import StudentPage from "../pages/students";
 import AdmissionPage from "../pages/student-admissions";
 import AppSettings from "../pages/app-settings";
 import Teachers from "../pages/teachers";
+import FeeDetailsPage from "../pages/students/student-detail/fee-details/student-fee-details";
+import StudentReportCardPage from "../pages/students/student-detail/report-card/report-card";
+import StudentEvaluation from "../pages/students/student-detail/student-evaluation";
+import StudentEvaluationDetail from "../pages/students/student-detail/student-evaluation/student-evaluaion";
 
 const AppRoutes = () => {
   return (
@@ -22,6 +26,19 @@ const AppRoutes = () => {
           <Route path="/admission" element={<AdmissionPage />} />
           <Route path="/teachers" element={<Teachers />} />
           <Route path="/settings" element={<AppSettings />} />
+          <Route
+            path="/students/:id/fee-details"
+            element={<FeeDetailsPage />}
+          />
+          <Route
+            path="/students/:id/report-card"
+            element={<StudentReportCardPage />}
+          />
+
+          <Route
+            path="/students/:id/evaluation"
+            element={<StudentEvaluationDetail />}
+          />
           {/* Add more routes as needed */}
         </Routes>
       </Layout>

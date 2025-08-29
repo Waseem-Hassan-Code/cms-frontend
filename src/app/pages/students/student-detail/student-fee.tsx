@@ -1,22 +1,31 @@
 // src/pages/students/components/StudentFeePanel.tsx
 import { Box, Typography, Paper, Divider, Button } from "@mui/material";
 import PaymentsIcon from "@mui/icons-material/Payments";
+import type { StudentFeeInfoDto } from "../../../../models/enrolled-students";
+import { useNavigate } from "react-router-dom";
 
-const StudentFeePanel = ({ studentId }: StudentFeePanelProps) => {
+interface StudentFeePanelProps {
+  fee?: StudentFeeInfoDto;
+  studentId: string;
+}
+
+const StudentFeePanel = ({ fee, studentId }: StudentFeePanelProps) => {
   const feeData = {
-    totalFee: 12000,
-    paid: 8000,
-    due: 4000,
-    lastPayment: "2023-05-15",
-    status: "Partially Paid",
+    totalFee: fee?.totalFee,
+    paid: fee?.paidFee,
+    due: fee?.dueFee,
+    lastPayment: fee?.lastPaymentDate,
+    status: fee?.paymentStatus,
   };
+
+  const navigate = useNavigate();
 
   return (
     <Paper
       elevation={2}
       sx={{
         p: 2,
-        pb: 2, // ensure padding at bottom
+        pb: 2,
         height: "100%",
         borderRadius: 2,
         display: "flex",
@@ -77,9 +86,16 @@ const StudentFeePanel = ({ studentId }: StudentFeePanelProps) => {
 
       {/* Bottom button pinned with spacing */}
       <Box sx={{ mt: 2 }}>
-        <Button variant="outlined" size="small" fullWidth sx={{ mb: 0 }}>
-          View Fee Details
-        </Button>
+        <Box sx={{ mt: 2 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            fullWidth
+            onClick={() => navigate(`/students/${studentId}/fee-details`)}
+          >
+            View Fee Details
+          </Button>
+        </Box>
       </Box>
     </Paper>
   );

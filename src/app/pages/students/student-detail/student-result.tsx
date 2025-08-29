@@ -1,7 +1,13 @@
 import { Box, Typography, Paper, Divider, Button } from "@mui/material";
 import BarChartIcon from "@mui/icons-material/BarChart";
+import { useNavigate } from "react-router-dom";
 
-export default function StudentExamResultsPanel() {
+interface StudentExamResultsProps {
+  studentId: string;
+}
+export default function StudentExamResultsPanel({
+  studentId,
+}: StudentExamResultsProps) {
   const examResults = {
     totalSubjects: 6,
     passedSubjects: 5,
@@ -10,18 +16,19 @@ export default function StudentExamResultsPanel() {
     resultStatus: "Pass",
     lastExamDate: "2024-12-18",
   };
+  const navigate = useNavigate();
 
   return (
     <Paper
       elevation={2}
       sx={{
         p: 2,
-        pb: 2, // 2px padding from bottom
+        pb: 2,
         height: "100%",
         borderRadius: 2,
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between", // This ensures button sticks at the bottom
+        justifyContent: "space-between",
       }}
     >
       {/* Top content */}
@@ -75,6 +82,7 @@ export default function StudentExamResultsPanel() {
           size="small"
           fullWidth
           sx={{ mb: 0, pb: 0.25 }}
+          onClick={() => navigate(`/students/${studentId}/report-card`)}
         >
           View Detailed Report
         </Button>
