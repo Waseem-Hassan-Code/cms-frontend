@@ -25,6 +25,8 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PrintIcon from "@mui/icons-material/Print";
 import { useNavigate } from "react-router-dom";
+import AddFeePopup from "./add-fee-popup";
+import EditFeePopup from "./edit-fee-popup";
 
 interface VoucherItem {
   id: number;
@@ -144,6 +146,15 @@ const FeeDetailsPage = () => {
     return { totalFee, discount, received, payable };
   };
 
+  const [openAddFee, setOpenAddFee] = useState(false);
+  const [openEditFee, setOpenEditFee] = useState(false);
+
+  const handleOpenAddFee = () => setOpenAddFee(true);
+  const handleCloseAddFee = () => setOpenAddFee(false);
+
+  const handleOpenEditFee = () => setOpenEditFee(true);
+  const handleCloseEditFee = () => setOpenEditFee(false);
+
   const handlePrintVoucher = (voucher: Voucher) => {
     const printContent = `
       <h2>Fee Voucher - ${voucher.month}</h2>
@@ -180,13 +191,56 @@ const FeeDetailsPage = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 3 }}>
       {/* Back Button */}
-      <Button
-        startIcon={<ArrowBackIcon />}
-        onClick={() => navigate(-1)}
-        sx={{ mb: 2 }}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
       >
-        Back
-      </Button>
+        {/* Back Button (Left) */}
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(-1)}
+          sx={{ textTransform: "none" }}
+        >
+          Back
+        </Button>
+
+        {/* Right Side Buttons */}
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button
+            startIcon={<AddIcon />}
+            onClick={handleOpenAddFee}
+            variant="contained"
+            sx={{
+              backgroundColor: "#009983",
+              "&:hover": {
+                backgroundColor: "#007b61",
+              },
+              textTransform: "none",
+            }}
+          >
+            Add Fee
+          </Button>
+
+          <Button
+            startIcon={<EditIcon />}
+            onClick={handleOpenEditFee}
+            variant="contained"
+            sx={{
+              backgroundColor: "#ffb400",
+              "&:hover": {
+                backgroundColor: "#e69500",
+              },
+              textTransform: "none",
+            }}
+          >
+            Edit Student Monthly Fee
+          </Button>
+        </Box>
+      </Box>
 
       {/* Student Header */}
       <Box sx={{ mb: 3 }}>
@@ -483,6 +537,8 @@ const FeeDetailsPage = () => {
           </Paper>
         );
       })}
+      <AddFeePopup open={openAddFee} onClose={handleCloseAddFee} />
+      <EditFeePopup open={openEditFee} onClose={handleCloseEditFee} />
     </Container>
   );
 };
