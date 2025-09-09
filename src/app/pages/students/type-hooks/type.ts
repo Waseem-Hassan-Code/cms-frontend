@@ -12,7 +12,7 @@ export interface StudentBasicInfoData {
   rollNumber: number;
   className: string;
   sectionName: string;
-  studentPhotoUrl: string;
+  studentPhotoUrl?: string;
   classId: string;
   sectionId: string;
   fatherName: string;

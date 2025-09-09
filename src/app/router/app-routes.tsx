@@ -11,7 +11,6 @@ import AppSettings from "../pages/app-settings";
 import Teachers from "../pages/teachers";
 import FeeDetailsPage from "../pages/students/student-detail/fee-details/student-fee-details";
 import StudentReportCardPage from "../pages/students/student-detail/report-card/report-card";
-import StudentEvaluation from "../pages/students/student-detail/student-evaluation";
 import StudentEvaluationDetail from "../pages/students/student-detail/student-evaluation/student-evaluaion";
 
 const AppRoutes = () => {

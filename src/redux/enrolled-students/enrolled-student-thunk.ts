@@ -9,7 +9,6 @@ import type {
   StudentDetailsDto,
 } from "../../models/enrolled-students";
 import { cms_base_api } from "../../app/middleware/cms-base-api";
-import type { StudentFeeVoucher } from "../../models/fee-details";
 
 export const getEnrolledStudents = createAsyncThunk<
   ApiResponse<ApiPaginatedResponse<EnrolledStudentDetailDto>>,
