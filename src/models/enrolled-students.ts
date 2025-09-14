@@ -21,6 +21,7 @@ export interface StudentDetailsDto {
   sectionId: string;
   fatherName: string;
   contactNumber: string;
+  tuitionFee: number;
   motherName: string;
   registrationNumber: string;
   address: string;

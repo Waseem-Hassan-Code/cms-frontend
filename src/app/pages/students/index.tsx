@@ -7,6 +7,7 @@ import type { AppDispatch, RootState } from "../../../redux/store";
 import {
   clearStudentDetail,
   setSelectedStudentId,
+  setStudentTutionFee,
 } from "../../../redux/enrolled-students/enrolled-student-slice";
 import { useEffect } from "react";
 import { getStudentDetailByStudentId } from "../../../redux/enrolled-students/enrolled-student-thunk";
@@ -18,7 +19,11 @@ const StudentPage = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    dispatch(getStudentDetailByStudentId({ id: selectedStudentId! }));
+    dispatch(getStudentDetailByStudentId({ id: selectedStudentId! }))
+      .unwrap()
+      .then(() => {
+        dispatch(setStudentTutionFee(studentDetails?.tuitionFee));
+      });
     return () => {
       dispatch(clearStudentDetail());
     };

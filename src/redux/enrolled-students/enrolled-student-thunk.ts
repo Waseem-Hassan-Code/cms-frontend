@@ -9,6 +9,7 @@ import type {
   StudentDetailsDto,
 } from "../../models/enrolled-students";
 import { cms_base_api } from "../../app/middleware/cms-base-api";
+import type { StudentFeeVoucher } from "../../models/fee-details";
 
 export const getEnrolledStudents = createAsyncThunk<
   ApiResponse<ApiPaginatedResponse<EnrolledStudentDetailDto>>,
@@ -67,3 +68,21 @@ export const getStudentDetailByStudentId = createAsyncThunk<
     }
   }
 );
+
+export const addMonthlyFeeVoucher = createAsyncThunk<
+  ApiResponse<string>,
+  StudentFeeVoucher,
+  { rejectValue: string }
+>("FeeDetails/addMonthlyFeeVoucher", async (voucher, { rejectWithValue }) => {
+  try {
+    const response = await cms_base_api.post<ApiResponse<string>>(
+      "Fee/add-monthly-fee-voucher",
+      voucher
+    );
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(
+      error.response?.data?.message || "Failed to add fee voucher"
+    );
+  }
+});

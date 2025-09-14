@@ -56,13 +56,18 @@ const FeeInfoStep = ({ control, errors, setValue }: FeeInfoStepProps) => {
   const { feeDetails, admissionVoucher } = useSelector(
     (state: RootState) => state.feeDetails
   );
+
+  const { settings } = useSelector(
+    (state: RootState) => state.applicationSettings
+  );
+
   const dispatch = useDispatch<AppDispatch>();
   const { studentId } = useSelector(
     (state: RootState) => state.studentAdmission
   );
 
   useEffect(() => {
-    if (!feeDetails || feeDetails.length === 0) {
+    if (!settings?.feeDetails || settings.feeDetails.length === 0) {
       dispatch(getFeeTypes());
       dispatch(getAdmissionVoucher({ id: studentId! }));
     }
@@ -223,7 +228,9 @@ const FeeInfoStep = ({ control, errors, setValue }: FeeInfoStepProps) => {
                       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                         {selected.map((value) => {
                           const [id, amount] = value.split(":");
-                          const fee = feeDetails?.find((f) => f.id === id);
+                          const fee = settings?.feeDetails?.find(
+                            (f) => f.id === id
+                          );
                           return (
                             <Chip
                               key={id}
@@ -244,7 +251,7 @@ const FeeInfoStep = ({ control, errors, setValue }: FeeInfoStepProps) => {
                       borderRadius: 2,
                     }}
                   >
-                    {(feeDetails || []).map((fee) => (
+                    {(settings?.feeDetails || []).map((fee) => (
                       <MenuItem
                         key={fee.id}
                         value={`${fee.id}:${fee.feeAmount}`}

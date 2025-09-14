@@ -6,6 +6,7 @@ import classSlice from "./school-settings/class-config/class-slice";
 import sectionSlice from "./school-settings/section-config/section-slice";
 import feeSlice from "./school-settings/fee-config/fee-slice";
 import enrolledStudentSlice from "./enrolled-students/enrolled-student-slice";
+import applicationSettingSlice from "./settings/settings-slice";
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     sectionSettings: sectionSlice,
     feeSettings: feeSlice,
     enrolledStudents: enrolledStudentSlice,
+    applicationSettings: applicationSettingSlice,
   },
 });
 

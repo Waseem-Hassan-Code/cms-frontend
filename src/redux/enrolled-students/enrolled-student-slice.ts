@@ -5,6 +5,7 @@ import type {
   StudentDetailsDto,
 } from "../../models/enrolled-students";
 import {
+  addMonthlyFeeVoucher,
   getEnrolledStudents,
   getStudentDetailByStudentId,
 } from "./enrolled-student-thunk";
@@ -20,6 +21,7 @@ interface StudentEnrollmentState {
   classId?: string;
   sectionId?: string;
   selectedStudentId?: string;
+  studentTuitionFee?: number;
 }
 
 const initialState: StudentEnrollmentState = {
@@ -33,6 +35,7 @@ const initialState: StudentEnrollmentState = {
   classId: "",
   sectionId: "",
   selectedStudentId: "",
+  studentTuitionFee: 0,
 };
 
 const studentEnrollmentSlice = createSlice({
@@ -63,6 +66,9 @@ const studentEnrollmentSlice = createSlice({
     },
     clearStudentDetail(state) {
       state.studentDetails = null;
+    },
+    setStudentTutionFee(state, action: PayloadAction<number | undefined>) {
+      state.studentTuitionFee = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -95,6 +101,20 @@ const studentEnrollmentSlice = createSlice({
         state.error =
           (action.payload as string) || "Failed to fetch student details";
       });
+
+    builder
+      .addCase(addMonthlyFeeVoucher.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addMonthlyFeeVoucher.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(addMonthlyFeeVoucher.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          (action.payload as string) || "Failed to fetch student details";
+      });
   },
 });
 
@@ -107,6 +127,7 @@ export const {
   clearStudents,
   setSelectedStudentId,
   clearStudentDetail,
+  setStudentTutionFee,
 } = studentEnrollmentSlice.actions;
 
 export default studentEnrollmentSlice.reducer;
