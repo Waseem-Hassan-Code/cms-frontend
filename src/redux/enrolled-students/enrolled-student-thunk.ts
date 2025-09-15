@@ -69,6 +69,27 @@ export const getStudentDetailByStudentId = createAsyncThunk<
   }
 );
 
+export const createOrUpdateMontlyFee = createAsyncThunk<
+  ApiResponse<number>,
+  { id: string; amount: number },
+  { rejectValue: string }
+>(
+  "enrolledStudents/create-or-update-student-montly-fee",
+  async ({ id, amount }, { rejectWithValue }) => {
+    try {
+      const response = await cms_base_api.post<ApiResponse<number>>(
+        "/EnrolledStudent/create-or-update-student-monthly-fee",
+        { studentId: id, amount }
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update monthly fee"
+      );
+    }
+  }
+);
+
 export const addMonthlyFeeVoucher = createAsyncThunk<
   ApiResponse<string>,
   StudentFeeVoucher,
@@ -76,7 +97,7 @@ export const addMonthlyFeeVoucher = createAsyncThunk<
 >("FeeDetails/addMonthlyFeeVoucher", async (voucher, { rejectWithValue }) => {
   try {
     const response = await cms_base_api.post<ApiResponse<string>>(
-      "Fee/add-monthly-fee-voucher",
+      "/EnrolledStudent/add-monthly-fee-voucher",
       voucher
     );
     return response.data;

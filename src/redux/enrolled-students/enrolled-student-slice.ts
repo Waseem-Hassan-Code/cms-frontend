@@ -6,6 +6,7 @@ import type {
 } from "../../models/enrolled-students";
 import {
   addMonthlyFeeVoucher,
+  createOrUpdateMontlyFee,
   getEnrolledStudents,
   getStudentDetailByStudentId,
 } from "./enrolled-student-thunk";
@@ -111,6 +112,21 @@ const studentEnrollmentSlice = createSlice({
         state.loading = false;
       })
       .addCase(addMonthlyFeeVoucher.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          (action.payload as string) || "Failed to fetch student details";
+      });
+
+    builder
+      .addCase(createOrUpdateMontlyFee.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createOrUpdateMontlyFee.fulfilled, (state, action) => {
+        state.loading = false;
+        state.studentTuitionFee = action.payload.data;
+      })
+      .addCase(createOrUpdateMontlyFee.rejected, (state, action) => {
         state.loading = false;
         state.error =
           (action.payload as string) || "Failed to fetch student details";
