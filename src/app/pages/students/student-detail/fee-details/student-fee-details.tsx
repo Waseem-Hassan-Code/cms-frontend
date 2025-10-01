@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Container,
   Paper,
@@ -24,9 +24,12 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PrintIcon from "@mui/icons-material/Print";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import AddFeePopup from "./add-fee-popup";
 import EditFeePopup from "./edit-fee-popup";
+import { useDispatch, useSelector } from "react-redux";
+import { getStudentPendingFeeDetailByStudentId } from "../../../../../redux/enrolled-students/fee-details/pending-fee-thunk";
+import type { AppDispatch, RootState } from "../../../../../redux/store";
 
 interface VoucherItem {
   id: number;
@@ -43,6 +46,16 @@ interface Voucher {
 
 const FeeDetailsPage = () => {
   const navigate = useNavigate();
+  const { id } = useParams() as { id: string };
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { refreshFlag } = useSelector(
+    (state: RootState) => state.enrolledStudents
+  );
+
+  useEffect(() => {
+    dispatch(getStudentPendingFeeDetailByStudentId({ id }));
+  }, [dispatch, id, refreshFlag]);
 
   const [vouchers, setVouchers] = useState<Voucher[]>([
     {

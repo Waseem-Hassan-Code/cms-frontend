@@ -26,6 +26,7 @@ interface StudentEnrollmentState {
   sectionId?: string;
   selectedStudentId?: string;
   studentTuitionFee?: number;
+  refreshFlag?: boolean;
 }
 
 const initialState: StudentEnrollmentState = {
@@ -40,6 +41,7 @@ const initialState: StudentEnrollmentState = {
   sectionId: "",
   selectedStudentId: "",
   studentTuitionFee: 0,
+  refreshFlag: false,
 };
 
 const studentEnrollmentSlice = createSlice({
@@ -60,6 +62,9 @@ const studentEnrollmentSlice = createSlice({
     },
     setSectionId(state, action: PayloadAction<string | undefined>) {
       state.sectionId = action.payload;
+    },
+    setRefreshFlag(state) {
+      state.refreshFlag = !state.refreshFlag;
     },
     clearStudents(state) {
       state.students = null;
@@ -146,6 +151,7 @@ export const {
   setSelectedStudentId,
   clearStudentDetail,
   setStudentTutionFee,
+  setRefreshFlag,
 } = studentEnrollmentSlice.actions;
 
 export default studentEnrollmentSlice.reducer;

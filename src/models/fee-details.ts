@@ -14,7 +14,7 @@ export interface StudentFeeVoucher {
   studentId: string;
   feeVoucherItems: FeeVoucherItem[];
   dueDate: Date | null;
-  voucherMonth: Date | null;
+  voucherMonthYear: string | null;
   tutionFee?: number;
   remarks?: string;
 }

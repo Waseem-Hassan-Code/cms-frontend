@@ -32,6 +32,7 @@ import type {
 } from "../../../../../models/fee-details";
 import { addMonthlyFeeVoucher } from "../../../../../redux/enrolled-students/enrolled-student-thunk";
 import { toast } from "sonner";
+import { setRefreshFlag } from "../../../../../redux/enrolled-students/enrolled-student-slice";
 
 interface AddFeePopupProps {
   open: boolean;
@@ -94,7 +95,8 @@ const AddFeePopup = ({ open, onClose }: AddFeePopupProps) => {
       studentId: id!,
       feeVoucherItems,
       dueDate: null,
-      voucherMonth,
+      // Convert Date to YYYY-MM-DD format for DateOnly
+      voucherMonthYear: voucherMonth.toISOString().split("T")[0], // "2025-01-01"
       tutionFee: feeAmount,
       remarks,
     };
@@ -103,6 +105,7 @@ const AddFeePopup = ({ open, onClose }: AddFeePopupProps) => {
       .unwrap()
       .then(() => {
         toast.success("Fee voucher added successfully");
+        dispatch(setRefreshFlag());
         onClose();
       })
       .catch((err) => {

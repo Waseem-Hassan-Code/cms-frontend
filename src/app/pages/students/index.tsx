@@ -13,8 +13,9 @@ import { getStudentDetailByStudentId } from "../../../redux/enrolled-students/en
 import { toast } from "sonner";
 
 const StudentPage = () => {
-  const { selectedStudentId, studentDetails, loading, studentTuitionFee } =
-    useSelector((state: RootState) => state.enrolledStudents);
+  const { selectedStudentId, studentDetails, loading } = useSelector(
+    (state: RootState) => state.enrolledStudents
+  );
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
