@@ -78,7 +78,7 @@ export const createOrUpdateMontlyFee = createAsyncThunk<
   async ({ id, amount }, { rejectWithValue }) => {
     try {
       const response = await cms_base_api.post<ApiResponse<number>>(
-        "/EnrolledStudent/create-or-update-student-monthly-fee",
+        "/enrolledStudent/create-or-update-student-monthly-fee",
         { studentId: id, amount }
       );
       return response.data;

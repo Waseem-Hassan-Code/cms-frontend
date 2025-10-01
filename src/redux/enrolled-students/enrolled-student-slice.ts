@@ -1,5 +1,8 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { ApiPaginatedResponse } from "../../models/api-response";
+import type {
+  ApiPaginatedResponse,
+  ApiResponse,
+} from "../../models/api-response";
 import type {
   EnrolledStudentDetailDto,
   StudentDetailsDto,
@@ -13,7 +16,7 @@ import {
 
 interface StudentEnrollmentState {
   students: ApiPaginatedResponse<EnrolledStudentDetailDto> | null;
-  studentDetails: StudentDetailsDto | null;
+  studentDetails: ApiResponse<StudentDetailsDto> | null;
   loading: boolean;
   error: string | null;
   pageNumber: number;
@@ -95,7 +98,7 @@ const studentEnrollmentSlice = createSlice({
       })
       .addCase(getStudentDetailByStudentId.fulfilled, (state, action) => {
         state.loading = false;
-        state.studentDetails = action.payload.data;
+        state.studentDetails = action.payload;
       })
       .addCase(getStudentDetailByStudentId.rejected, (state, action) => {
         state.loading = false;
@@ -113,8 +116,7 @@ const studentEnrollmentSlice = createSlice({
       })
       .addCase(addMonthlyFeeVoucher.rejected, (state, action) => {
         state.loading = false;
-        state.error =
-          (action.payload as string) || "Failed to fetch student details";
+        state.error = (action.payload as string) || "Failed to add fee voucher";
       });
 
     builder
@@ -129,7 +131,7 @@ const studentEnrollmentSlice = createSlice({
       .addCase(createOrUpdateMontlyFee.rejected, (state, action) => {
         state.loading = false;
         state.error =
-          (action.payload as string) || "Failed to fetch student details";
+          (action.payload as string) || "Failed to update monthly fee";
       });
   },
 });

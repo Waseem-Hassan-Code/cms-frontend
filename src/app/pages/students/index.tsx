@@ -5,29 +5,31 @@ import StudentFilters from "./student-filters";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../../redux/store";
 import {
-  clearStudentDetail,
   setSelectedStudentId,
   setStudentTutionFee,
 } from "../../../redux/enrolled-students/enrolled-student-slice";
 import { useEffect } from "react";
 import { getStudentDetailByStudentId } from "../../../redux/enrolled-students/enrolled-student-thunk";
+import { toast } from "sonner";
 
 const StudentPage = () => {
-  const { selectedStudentId, studentDetails, loading } = useSelector(
-    (state: RootState) => state.enrolledStudents
-  );
+  const { selectedStudentId, studentDetails, loading, studentTuitionFee } =
+    useSelector((state: RootState) => state.enrolledStudents);
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    dispatch(getStudentDetailByStudentId({ id: selectedStudentId! }))
-      .unwrap()
-      .then(() => {
-        dispatch(setStudentTutionFee(studentDetails?.tuitionFee));
-      });
-    return () => {
-      dispatch(clearStudentDetail());
-    };
-  }, [selectedStudentId]);
+    if (selectedStudentId) {
+      dispatch(getStudentDetailByStudentId({ id: selectedStudentId }))
+        .unwrap()
+        .then((result) => {
+          // Use the correct property name from your API
+          dispatch(setStudentTutionFee(result?.data?.tutionFee || 0));
+        })
+        .catch((error) => {
+          toast.error(error || "Failed to fetch student details");
+        });
+    }
+  }, [selectedStudentId, dispatch]);
 
   const handleBackClick = () => {
     dispatch(setSelectedStudentId(""));
@@ -44,7 +46,7 @@ const StudentPage = () => {
         </>
       ) : (
         <StudentDetail
-          student={studentDetails!}
+          student={studentDetails?.data!}
           isLoading={loading}
           onBack={handleBackClick}
         />

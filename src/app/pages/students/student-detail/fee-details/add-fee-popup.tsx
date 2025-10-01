@@ -23,7 +23,6 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { startOfMonth } from "date-fns";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../../../../redux/store";
-import { addFeeVoucher } from "../../../../../redux/fee-details/fee-detail-thunk";
 import { useParams } from "react-router-dom";
 import type { RootState } from "../../../../../redux/store";
 
