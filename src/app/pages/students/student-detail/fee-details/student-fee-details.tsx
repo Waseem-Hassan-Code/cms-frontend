@@ -15,11 +15,14 @@ import {
   Collapse,
   Select,
   MenuItem,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
+import CancelIcon from "@mui/icons-material/Cancel";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -29,20 +32,20 @@ import AddFeePopup from "./add-fee-popup";
 import EditFeePopup from "./edit-fee-popup";
 import { useDispatch, useSelector } from "react-redux";
 import { getStudentPendingFeeDetailByStudentId } from "../../../../../redux/enrolled-students/fee-details/pending-fee-thunk";
+import {
+  updateFeeVoucherItem,
+  deleteFeeVoucherItem,
+} from "../../../../../redux/settings/settings-thunk";
+import {
+  clearUpdateError,
+  clearDeleteError,
+} from "../../../../../redux/settings/settings-slice";
 import type { AppDispatch, RootState } from "../../../../../redux/store";
-
-interface VoucherItem {
-  id: number;
-  feeType: string;
-  totalFee: number;
-  discount: number;
-  received: number;
-}
-
-interface Voucher {
-  month: string;
-  items: VoucherItem[];
-}
+import type {
+  FeeVouchersDto,
+  FeeVoucherItemsDto,
+} from "../../../../../models/pending-fee-detail";
+import type { FeeDetailsDto } from "../../../../../models/fee-details";
 
 const FeeDetailsPage = () => {
   const navigate = useNavigate();
@@ -53,110 +56,349 @@ const FeeDetailsPage = () => {
     (state: RootState) => state.enrolledStudents
   );
 
+  const { pendingFees, loading, error } = useSelector(
+    (state: RootState) => state.enrolledStudentPendingFeeAndOtherDetails
+  );
+
+  const { settings, updateError, deleteError } = useSelector(
+    (state: RootState) => state.applicationSettings
+  );
+
   useEffect(() => {
     dispatch(getStudentPendingFeeDetailByStudentId({ id }));
   }, [dispatch, id, refreshFlag]);
 
-  const [vouchers, setVouchers] = useState<Voucher[]>([
-    {
-      month: "January 2025",
-      items: [
-        {
-          id: 1,
-          feeType: "Admission Fee",
-          totalFee: 5000,
-          discount: 0,
-          received: 5000,
-        },
-        {
-          id: 2,
-          feeType: "Tuition Fee",
-          totalFee: 2000,
-          discount: 200,
-          received: 1800,
-        },
-      ],
-    },
-    {
-      month: "February 2025",
-      items: [
-        {
-          id: 3,
-          feeType: "Tuition Fee",
-          totalFee: 2000,
-          discount: 0,
-          received: 2000,
-        },
-      ],
-    },
-  ]);
+  // Monitor update errors from settings slice
+  useEffect(() => {
+    if (updateError) {
+      setErrorMessage(updateError);
+    }
+  }, [updateError]);
+
+  // Monitor delete errors from settings slice
+  useEffect(() => {
+    if (deleteError) {
+      setErrorMessage(deleteError);
+    }
+  }, [deleteError]);
+
+  // Clear errors when component unmounts
+  useEffect(() => {
+    return () => {
+      if (updateError) {
+        dispatch(clearUpdateError());
+      }
+      if (deleteError) {
+        dispatch(clearDeleteError());
+      }
+    };
+  }, [dispatch, updateError, deleteError]);
+
+  // Get vouchers from API data
+  const apiVouchers = pendingFees?.data || [];
+
+  // Local state for vouchers to enable optimistic updates
+  // This prevents unnecessary API refetches and improves performance
+  const [localVouchers, setLocalVouchers] = useState<FeeVouchersDto[]>([]);
+
+  // Update local vouchers when API data changes
+  useEffect(() => {
+    setLocalVouchers(apiVouchers);
+  }, [apiVouchers]);
+
+  // Use local vouchers for rendering
+  const vouchers = localVouchers;
 
   const [expandedMonth, setExpandedMonth] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [newItemMonth, setNewItemMonth] = useState<string | null>(null);
-  const [newItem, setNewItem] = useState<VoucherItem | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [newItemVoucherId, setNewItemVoucherId] = useState<string | null>(null);
+  const [newItem, setNewItem] = useState<Partial<FeeVoucherItemsDto> | null>(
+    null
+  );
 
-  const toggleExpand = (month: string) => {
-    setExpandedMonth(expandedMonth === month ? null : month);
+  // State for success/error messages
+  const [successMessage, setSuccessMessage] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
+
+  // State to track temporary edit values
+  const [tempEditValues, setTempEditValues] = useState<{
+    [key: string]: Partial<FeeVoucherItemsDto>;
+  }>({});
+
+  const toggleExpand = (voucherId: string) => {
+    setExpandedMonth(expandedMonth === voucherId ? null : voucherId);
   };
 
-  const handleEdit = (id: number) => setEditingId(id);
+  const handleEdit = (id: string) => {
+    // Find the current item
+    const currentItem = vouchers
+      .flatMap((v) => v.feeVoucherItems || [])
+      .find((item) => item.id === id);
 
-  const handleSave = (month: string, id: number, updated: VoucherItem) => {
-    setVouchers(
-      vouchers.map((voucher) =>
-        voucher.month === month
-          ? {
-              ...voucher,
-              items: voucher.items.map((i) => (i.id === id ? updated : i)),
-            }
-          : voucher
-      )
-    );
-    setEditingId(null);
+    if (currentItem) {
+      // Don't allow editing admission fees
+      if (isAdmissionFee(currentItem.feeTypeName)) {
+        console.log("Cannot edit admission fee item");
+        return;
+      }
+
+      // Initialize temp edit values with current item values
+      setTempEditValues((prev) => ({
+        ...prev,
+        [id]: {
+          ...currentItem,
+          // Ensure all required fields are present
+          feeTypeName: currentItem.feeTypeName || "",
+          feeTypeId: currentItem.feeTypeId || "",
+          feeAmount: currentItem.feeAmount || 0,
+          discountAmount: currentItem.discountAmount || 0,
+          paidAmount: currentItem.paidAmount || 0,
+          dueAmount: currentItem.dueAmount || 0,
+        },
+      }));
+    }
+    setEditingId(id);
   };
 
-  const handleDelete = (month: string, id: number) => {
-    setVouchers(
-      vouchers.map((voucher) =>
-        voucher.month === month
-          ? { ...voucher, items: voucher.items.filter((i) => i.id !== id) }
-          : voucher
-      )
-    );
+  const handleSave = async (
+    voucherId: string,
+    itemId: string,
+    updated: Partial<FeeVoucherItemsDto>
+  ) => {
+    console.log("Individual save clicked:", {
+      voucherId,
+      itemId,
+      updated,
+    });
+
+    try {
+      // Find the original item to get all required fields
+      const originalItem = vouchers
+        .flatMap((v) => v.feeVoucherItems || [])
+        .find((item) => item.id === itemId);
+
+      if (!originalItem) {
+        throw new Error(`Original item with id ${itemId} not found`);
+      }
+
+      // Merge original item with updated data
+      const feeVoucherItemToUpdate: FeeVoucherItemsDto = {
+        ...originalItem,
+        ...updated,
+        // Ensure Guid format (strings in TypeScript)
+        id: originalItem.id,
+        feeVoucherId: originalItem.feeVoucherId,
+        feeTypeId: updated.feeTypeId || originalItem.feeTypeId,
+        feeTypeName: updated.feeTypeName || originalItem.feeTypeName,
+        feeAmount: updated.feeAmount ?? originalItem.feeAmount,
+        discountAmount: updated.discountAmount ?? originalItem.discountAmount,
+        paidAmount: updated.paidAmount ?? originalItem.paidAmount,
+        dueAmount: updated.dueAmount ?? originalItem.dueAmount,
+        remarks: updated.remarks ?? originalItem.remarks,
+      };
+
+      console.log("Updating individual item:", feeVoucherItemToUpdate);
+
+      // Call the API
+      const result = await dispatch(
+        updateFeeVoucherItem(feeVoucherItemToUpdate)
+      ).unwrap();
+
+      console.log("Update successful:", result);
+
+      // Update local state optimistically
+      setLocalVouchers((prevVouchers) =>
+        prevVouchers.map((voucher) => ({
+          ...voucher,
+          feeVoucherItems: (voucher.feeVoucherItems || []).map((item) =>
+            item.id === itemId ? feeVoucherItemToUpdate : item
+          ),
+        }))
+      );
+
+      // Clear temp edit values for this item
+      setTempEditValues((prev) => {
+        const newValues = { ...prev };
+        delete newValues[itemId];
+        return newValues;
+      });
+
+      setEditingId(null);
+
+      // Show success message
+      setSuccessMessage("Fee voucher item updated successfully!");
+    } catch (error) {
+      console.error("Update failed:", error);
+
+      // Revert any temporary edit values since the update failed
+      setTempEditValues((prev) => {
+        const newValues = { ...prev };
+        delete newValues[itemId];
+        return newValues;
+      });
+
+      setEditingId(null);
+
+      setErrorMessage(
+        typeof error === "string" ? error : "Failed to update fee voucher item"
+      );
+    }
   };
 
-  const handleAddRow = (month: string) => {
-    setNewItemMonth(month);
+  const handleDelete = async (voucherId: string, itemId: string) => {
+    console.log("Delete voucher item:", { voucherId, itemId });
+
+    try {
+      // Call the delete API
+      await dispatch(deleteFeeVoucherItem(itemId)).unwrap();
+
+      console.log("Delete successful");
+
+      // Update local state optimistically - remove the item
+      setLocalVouchers((prevVouchers) =>
+        prevVouchers.map((voucher) => ({
+          ...voucher,
+          feeVoucherItems: (voucher.feeVoucherItems || []).filter(
+            (item) => item.id !== itemId
+          ),
+        }))
+      );
+
+      // Show success message
+      setSuccessMessage("Fee voucher item deleted successfully!");
+    } catch (error) {
+      console.error("Delete failed:", error);
+      // No need to revert local state for delete since we don't do optimistic delete
+      // (we only update local state after successful API call)
+      setErrorMessage(
+        typeof error === "string" ? error : "Failed to delete fee voucher item"
+      );
+    }
+  };
+
+  const handleAddRow = (voucherId: string) => {
+    setNewItemVoucherId(voucherId);
     setNewItem({
-      id: Date.now(),
-      feeType: "",
-      totalFee: 0,
-      discount: 0,
-      received: 0,
+      id: "",
+      feeVoucherId: voucherId,
+      feeTypeId: "",
+      feeTypeName: "",
+      feeAmount: 0,
+      discountAmount: 0,
+      paidAmount: 0,
+      dueAmount: 0,
+      remarks: null,
     });
   };
 
   const handleSaveNew = () => {
-    if (newItem && newItemMonth) {
-      setVouchers(
-        vouchers.map((voucher) =>
-          voucher.month === newItemMonth
-            ? { ...voucher, items: [...voucher.items, newItem] }
-            : voucher
-        )
-      );
+    if (newItem && newItemVoucherId) {
+      // TODO: Implement API call to create new fee voucher item
+      console.log("Save new voucher item:", { newItem, newItemVoucherId });
       setNewItem(null);
-      setNewItemMonth(null);
+      setNewItemVoucherId(null);
     }
   };
 
-  const calculateSummary = (items: VoucherItem[]) => {
-    const totalFee = items.reduce((sum, i) => sum + i.totalFee, 0);
-    const discount = items.reduce((sum, i) => sum + i.discount, 0);
-    const received = items.reduce((sum, i) => sum + i.received, 0);
+  const calculateSummary = (
+    items: FeeVoucherItemsDto[],
+    includeEdits: boolean = false
+  ) => {
+    const itemsWithEdits = includeEdits
+      ? items.map((item) => ({
+          ...item,
+          ...tempEditValues[item.id],
+        }))
+      : items;
+
+    const totalFee = itemsWithEdits.reduce(
+      (sum, i) => sum + (i.feeAmount || 0),
+      0
+    );
+    const discount = itemsWithEdits.reduce(
+      (sum, i) => sum + (i.discountAmount || 0),
+      0
+    );
+    const received = itemsWithEdits.reduce(
+      (sum, i) => sum + (i.paidAmount || 0),
+      0
+    );
+    // Calculate payable as totalFee - discount - received for real-time updates
     const payable = totalFee - discount - received;
     return { totalFee, discount, received, payable };
+  };
+
+  // Helper function to get fee types from settings
+  const getFeeTypes = (): FeeDetailsDto[] => {
+    return settings?.feeDetails || [];
+  };
+
+  // Helper function to check if fee type is admission fee (non-editable)
+  const isAdmissionFee = (feeTypeName: string): boolean => {
+    return feeTypeName?.toLowerCase().includes("admission") || false;
+  };
+
+  // Helper function to get current edit value for an item
+  const getCurrentEditValue = (
+    itemId: string,
+    field: keyof FeeVoucherItemsDto,
+    originalValue: any
+  ) => {
+    return tempEditValues[itemId]?.[field] ?? originalValue;
+  };
+
+  // Helper function to update temp edit values
+  const updateTempEditValue = (
+    itemId: string,
+    field: keyof FeeVoucherItemsDto,
+    value: any
+  ) => {
+    setTempEditValues((prev) => {
+      const currentItem = prev[itemId] || {};
+      const updatedItem = {
+        ...currentItem,
+        [field]: value,
+      };
+
+      // Auto-calculate due amount when fee amount, discount, or paid amount changes
+      if (
+        field === "feeAmount" ||
+        field === "discountAmount" ||
+        field === "paidAmount"
+      ) {
+        const feeAmount = updatedItem.feeAmount || 0;
+        const discountAmount = updatedItem.discountAmount || 0;
+        const paidAmount = updatedItem.paidAmount || 0;
+        updatedItem.dueAmount = feeAmount - discountAmount - paidAmount;
+      }
+
+      return {
+        ...prev,
+        [itemId]: updatedItem,
+      };
+    });
+  };
+
+  // Function to cancel editing
+  const handleCancelEdit = (itemId: string) => {
+    setEditingId(null);
+    // Clear temp edit values for this item
+    setTempEditValues((prev) => {
+      const newValues = { ...prev };
+      delete newValues[itemId];
+      return newValues;
+    });
+  };
+
+  // Function to clear error messages and update/delete errors
+  const clearErrors = () => {
+    setErrorMessage("");
+    if (updateError) {
+      dispatch(clearUpdateError());
+    }
+    if (deleteError) {
+      dispatch(clearDeleteError());
+    }
   };
 
   const [openAddFee, setOpenAddFee] = useState(false);
@@ -168,9 +410,15 @@ const FeeDetailsPage = () => {
   const handleOpenEditFee = () => setOpenEditFee(true);
   const handleCloseEditFee = () => setOpenEditFee(false);
 
-  const handlePrintVoucher = (voucher: Voucher) => {
+  const handlePrintVoucher = (voucher: FeeVouchersDto) => {
+    const voucherDate = voucher.voucherMonthYear
+      ? new Date(voucher.voucherMonthYear).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+        })
+      : "N/A";
     const printContent = `
-      <h2>Fee Voucher - ${voucher.month}</h2>
+      <h2>Fee Voucher - ${voucherDate}</h2>
       <p><b>Student:</b> Ali Khan | <b>Class:</b> 10-B</p>
       <table border="1" cellspacing="0" cellpadding="8" width="100%">
         <tr>
@@ -179,14 +427,14 @@ const FeeDetailsPage = () => {
           <th>Discount</th>
           <th>Received</th>
         </tr>
-        ${voucher.items
+        ${(voucher.feeVoucherItems || [])
           .map(
             (i) => `
           <tr>
-            <td>${i.feeType}</td>
-            <td>${i.totalFee}</td>
-            <td>${i.discount}</td>
-            <td>${i.received}</td>
+            <td>${i.feeTypeName}</td>
+            <td>${i.feeAmount}</td>
+            <td>${i.discountAmount}</td>
+            <td>${i.paidAmount}</td>
           </tr>
         `
           )
@@ -265,293 +513,461 @@ const FeeDetailsPage = () => {
         </Typography>
       </Box>
 
-      {vouchers.map((voucher) => {
-        const summary = calculateSummary(voucher.items);
+      {/* Loading State */}
+      {loading && (
+        <Box sx={{ textAlign: "center", py: 4 }}>
+          <Typography>Loading fee details...</Typography>
+        </Box>
+      )}
 
-        return (
-          <Paper key={voucher.month} sx={{ mb: 3, p: 2, borderRadius: 2 }}>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              onClick={() => toggleExpand(voucher.month)}
-              sx={{ cursor: "pointer" }}
-            >
-              <Typography variant="h6">{voucher.month}</Typography>
-              <Box display="flex" alignItems="center" gap={1}>
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePrintVoucher(voucher);
-                  }}
-                >
-                  <PrintIcon />
-                </IconButton>
-                {expandedMonth === voucher.month ? (
-                  <ExpandLessIcon />
-                ) : (
-                  <ExpandMoreIcon />
-                )}
+      {/* Error State */}
+      {error && (
+        <Box sx={{ textAlign: "center", py: 4 }}>
+          <Typography color="error">Error: {error}</Typography>
+        </Box>
+      )}
+
+      {/* Empty State */}
+      {!loading && !error && vouchers.length === 0 && (
+        <Box sx={{ textAlign: "center", py: 4 }}>
+          <Typography color="text.secondary">No fee vouchers found.</Typography>
+        </Box>
+      )}
+
+      {/* Fee Vouchers */}
+      {!loading &&
+        !error &&
+        vouchers.map((voucher) => {
+          const voucherItems = voucher.feeVoucherItems || [];
+          const summary = calculateSummary(voucherItems, true); // Include temp edits for real-time updates
+          const voucherDate = voucher.voucherMonthYear
+            ? new Date(voucher.voucherMonthYear).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+              })
+            : "N/A";
+
+          return (
+            <Paper key={voucher.id} sx={{ mb: 3, p: 2, borderRadius: 2 }}>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                onClick={() => toggleExpand(voucher.id)}
+                sx={{ cursor: "pointer" }}
+              >
+                <Typography variant="h6">{voucherDate}</Typography>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePrintVoucher(voucher);
+                    }}
+                  >
+                    <PrintIcon />
+                  </IconButton>
+                  {expandedMonth === voucher.id ? (
+                    <ExpandLessIcon />
+                  ) : (
+                    <ExpandMoreIcon />
+                  )}
+                </Box>
               </Box>
-            </Box>
 
-            <Collapse
-              in={expandedMonth === voucher.month}
-              timeout="auto"
-              unmountOnExit
-            >
-              {/* same table and add-item logic as before */}
-              <Table sx={{ mt: 2 }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Fee Type</TableCell>
-                    <TableCell>Total Fee</TableCell>
-                    <TableCell>Discount</TableCell>
-                    <TableCell>Received</TableCell>
-                    <TableCell align="right">Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {voucher.items.map((item) =>
-                    editingId === item.id ? (
-                      <TableRow key={item.id}>
+              <Collapse
+                in={expandedMonth === voucher.id}
+                timeout="auto"
+                unmountOnExit
+              >
+                {/* same table and add-item logic as before */}
+                <Table sx={{ mt: 2 }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Fee Type</TableCell>
+                      <TableCell>Total Fee</TableCell>
+                      <TableCell>Discount</TableCell>
+                      <TableCell>Received</TableCell>
+                      <TableCell align="right">Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {voucherItems.map((item) =>
+                      editingId === item.id ? (
+                        <TableRow key={item.id}>
+                          <TableCell>
+                            {isAdmissionFee(item.feeTypeName) ? (
+                              <TextField
+                                value="Admission Fee"
+                                disabled
+                                fullWidth
+                                variant="outlined"
+                                size="small"
+                              />
+                            ) : (
+                              <Select
+                                value={
+                                  getCurrentEditValue(
+                                    item.id,
+                                    "feeTypeName",
+                                    item.feeTypeName
+                                  ) ||
+                                  item.feeTypeName ||
+                                  ""
+                                }
+                                onChange={(e) => {
+                                  const selectedFeeType = getFeeTypes().find(
+                                    (ft) => ft.feeType === e.target.value
+                                  );
+                                  updateTempEditValue(
+                                    item.id,
+                                    "feeTypeName",
+                                    e.target.value
+                                  );
+                                  if (selectedFeeType) {
+                                    updateTempEditValue(
+                                      item.id,
+                                      "feeTypeId",
+                                      selectedFeeType.id || ""
+                                    );
+                                    // Auto-update fee amount when fee type changes
+                                    updateTempEditValue(
+                                      item.id,
+                                      "feeAmount",
+                                      selectedFeeType.feeAmount || 0
+                                    );
+                                  }
+                                }}
+                                fullWidth
+                                size="small"
+                              >
+                                {getFeeTypes().map((feeType) => (
+                                  <MenuItem
+                                    key={feeType.id}
+                                    value={feeType.feeType}
+                                  >
+                                    {feeType.feeType}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              type="number"
+                              value={getCurrentEditValue(
+                                item.id,
+                                "feeAmount",
+                                item.feeAmount
+                              )}
+                              onChange={(e) => {
+                                updateTempEditValue(
+                                  item.id,
+                                  "feeAmount",
+                                  Number(e.target.value)
+                                );
+                              }}
+                              disabled={isAdmissionFee(item.feeTypeName)}
+                              size="small"
+                              fullWidth
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              type="number"
+                              value={getCurrentEditValue(
+                                item.id,
+                                "discountAmount",
+                                item.discountAmount
+                              )}
+                              onChange={(e) => {
+                                updateTempEditValue(
+                                  item.id,
+                                  "discountAmount",
+                                  Number(e.target.value)
+                                );
+                              }}
+                              disabled={isAdmissionFee(item.feeTypeName)}
+                              size="small"
+                              fullWidth
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              type="number"
+                              value={getCurrentEditValue(
+                                item.id,
+                                "paidAmount",
+                                item.paidAmount
+                              )}
+                              onChange={(e) => {
+                                updateTempEditValue(
+                                  item.id,
+                                  "paidAmount",
+                                  Number(e.target.value)
+                                );
+                              }}
+                              disabled={isAdmissionFee(item.feeTypeName)}
+                              size="small"
+                              fullWidth
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            <IconButton
+                              color="success"
+                              onClick={() => {
+                                const updatedData = {
+                                  ...item,
+                                  ...tempEditValues[item.id],
+                                };
+                                handleSave(voucher.id, item.id, updatedData);
+                              }}
+                            >
+                              <SaveIcon />
+                            </IconButton>
+                            <IconButton
+                              color="error"
+                              onClick={() => handleCancelEdit(item.id)}
+                            >
+                              <CancelIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        <TableRow key={item.id}>
+                          <TableCell>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                color: isAdmissionFee(item.feeTypeName)
+                                  ? "#666"
+                                  : "inherit",
+                              }}
+                            >
+                              {item.feeTypeName || "Admission Fee"}
+                              {isAdmissionFee(item.feeTypeName) && (
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    ml: 1,
+                                    fontSize: "0.75rem",
+                                    color: "#999",
+                                    fontStyle: "italic",
+                                  }}
+                                >
+                                  (Non-editable)
+                                </Box>
+                              )}
+                            </Box>
+                          </TableCell>
+                          <TableCell>{item.feeAmount}</TableCell>
+                          <TableCell>{item.discountAmount}</TableCell>
+                          <TableCell>{item.paidAmount}</TableCell>
+                          <TableCell align="right">
+                            <IconButton
+                              onClick={() => handleEdit(item.id)}
+                              disabled={isAdmissionFee(item.feeTypeName)}
+                              title={
+                                isAdmissionFee(item.feeTypeName)
+                                  ? "Admission fees cannot be edited"
+                                  : "Edit this fee item"
+                              }
+                            >
+                              <EditIcon />
+                            </IconButton>
+                            <IconButton
+                              color="error"
+                              onClick={() => handleDelete(voucher.id, item.id)}
+                              disabled={isAdmissionFee(item.feeTypeName)}
+                              title={
+                                isAdmissionFee(item.feeTypeName)
+                                  ? "Admission fees cannot be deleted"
+                                  : "Delete this fee item"
+                              }
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    )}
+
+                    {/* New Row */}
+                    {newItem && newItemVoucherId === voucher.id && (
+                      <TableRow>
                         <TableCell>
                           <Select
-                            value={item.feeType}
-                            onChange={(e) =>
-                              setVouchers(
-                                vouchers.map((v) =>
-                                  v.month === voucher.month
-                                    ? {
-                                        ...v,
-                                        items: v.items.map((i) =>
-                                          i.id === item.id
-                                            ? { ...i, feeType: e.target.value }
-                                            : i
-                                        ),
-                                      }
-                                    : v
-                                )
-                              )
-                            }
+                            value={newItem.feeTypeName || ""}
+                            onChange={(e) => {
+                              const selectedFeeType = getFeeTypes().find(
+                                (ft) => ft.feeType === e.target.value
+                              );
+                              const feeAmount = selectedFeeType?.feeAmount || 0;
+                              const discountAmount =
+                                newItem.discountAmount || 0;
+                              const paidAmount = newItem.paidAmount || 0;
+                              setNewItem({
+                                ...newItem,
+                                feeTypeName: e.target.value,
+                                feeTypeId: selectedFeeType?.id || "",
+                                feeAmount: feeAmount, // Auto-fill fee amount
+                                dueAmount:
+                                  feeAmount - discountAmount - paidAmount,
+                              });
+                            }}
                             fullWidth
+                            size="small"
                           >
-                            <MenuItem value="Admission Fee">
-                              Admission Fee
-                            </MenuItem>
-                            <MenuItem value="Tuition Fee">Tuition Fee</MenuItem>
-                            <MenuItem value="Transport Fee">
-                              Transport Fee
-                            </MenuItem>
+                            {getFeeTypes().map((feeType) => (
+                              <MenuItem
+                                key={feeType.id}
+                                value={feeType.feeType}
+                              >
+                                {feeType.feeType}
+                              </MenuItem>
+                            ))}
                           </Select>
                         </TableCell>
                         <TableCell>
                           <TextField
                             type="number"
-                            value={item.totalFee}
-                            onChange={(e) =>
-                              setVouchers(
-                                vouchers.map((v) =>
-                                  v.month === voucher.month
-                                    ? {
-                                        ...v,
-                                        items: v.items.map((i) =>
-                                          i.id === item.id
-                                            ? {
-                                                ...i,
-                                                totalFee: +e.target.value,
-                                              }
-                                            : i
-                                        ),
-                                      }
-                                    : v
-                                )
-                              )
-                            }
+                            value={newItem.feeAmount || 0}
+                            onChange={(e) => {
+                              const feeAmount = +e.target.value;
+                              const discountAmount =
+                                newItem.discountAmount || 0;
+                              const paidAmount = newItem.paidAmount || 0;
+                              setNewItem({
+                                ...newItem,
+                                feeAmount,
+                                dueAmount:
+                                  feeAmount - discountAmount - paidAmount,
+                              });
+                            }}
+                            size="small"
+                            fullWidth
                           />
                         </TableCell>
                         <TableCell>
                           <TextField
                             type="number"
-                            value={item.discount}
-                            onChange={(e) =>
-                              setVouchers(
-                                vouchers.map((v) =>
-                                  v.month === voucher.month
-                                    ? {
-                                        ...v,
-                                        items: v.items.map((i) =>
-                                          i.id === item.id
-                                            ? {
-                                                ...i,
-                                                discount: +e.target.value,
-                                              }
-                                            : i
-                                        ),
-                                      }
-                                    : v
-                                )
-                              )
-                            }
+                            value={newItem.discountAmount || 0}
+                            onChange={(e) => {
+                              const discountAmount = +e.target.value;
+                              const feeAmount = newItem.feeAmount || 0;
+                              const paidAmount = newItem.paidAmount || 0;
+                              setNewItem({
+                                ...newItem,
+                                discountAmount,
+                                dueAmount:
+                                  feeAmount - discountAmount - paidAmount,
+                              });
+                            }}
+                            size="small"
+                            fullWidth
                           />
                         </TableCell>
                         <TableCell>
                           <TextField
                             type="number"
-                            value={item.received}
-                            onChange={(e) =>
-                              setVouchers(
-                                vouchers.map((v) =>
-                                  v.month === voucher.month
-                                    ? {
-                                        ...v,
-                                        items: v.items.map((i) =>
-                                          i.id === item.id
-                                            ? {
-                                                ...i,
-                                                received: +e.target.value,
-                                              }
-                                            : i
-                                        ),
-                                      }
-                                    : v
-                                )
-                              )
-                            }
+                            value={newItem.paidAmount || 0}
+                            onChange={(e) => {
+                              const paidAmount = +e.target.value;
+                              const feeAmount = newItem.feeAmount || 0;
+                              const discountAmount =
+                                newItem.discountAmount || 0;
+                              setNewItem({
+                                ...newItem,
+                                paidAmount,
+                                dueAmount:
+                                  feeAmount - discountAmount - paidAmount,
+                              });
+                            }}
+                            size="small"
+                            fullWidth
                           />
                         </TableCell>
                         <TableCell align="right">
-                          <IconButton
-                            color="success"
-                            onClick={() =>
-                              handleSave(voucher.month, item.id, item)
-                            }
-                          >
+                          <IconButton color="success" onClick={handleSaveNew}>
                             <SaveIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      <TableRow key={item.id}>
-                        <TableCell>{item.feeType}</TableCell>
-                        <TableCell>{item.totalFee}</TableCell>
-                        <TableCell>{item.discount}</TableCell>
-                        <TableCell>{item.received}</TableCell>
-                        <TableCell align="right">
-                          <IconButton onClick={() => handleEdit(item.id)}>
-                            <EditIcon />
                           </IconButton>
                           <IconButton
                             color="error"
-                            onClick={() => handleDelete(voucher.month, item.id)}
+                            onClick={() => {
+                              setNewItem(null);
+                              setNewItemVoucherId(null);
+                            }}
                           >
-                            <DeleteIcon />
+                            <CancelIcon />
                           </IconButton>
                         </TableCell>
                       </TableRow>
-                    )
-                  )}
+                    )}
 
-                  {/* New Row */}
-                  {newItem && newItemMonth === voucher.month && (
-                    <TableRow>
+                    {/* Summary row */}
+                    <TableRow sx={{ backgroundColor: "#f9f9f9" }}>
                       <TableCell>
-                        <Select
-                          value={newItem.feeType}
-                          onChange={(e) =>
-                            setNewItem({ ...newItem, feeType: e.target.value })
-                          }
-                          fullWidth
-                        >
-                          <MenuItem value="Admission Fee">
-                            Admission Fee
-                          </MenuItem>
-                          <MenuItem value="Tuition Fee">Tuition Fee</MenuItem>
-                          <MenuItem value="Transport Fee">
-                            Transport Fee
-                          </MenuItem>
-                        </Select>
+                        <b>Summary</b>
                       </TableCell>
                       <TableCell>
-                        <TextField
-                          type="number"
-                          value={newItem.totalFee}
-                          onChange={(e) =>
-                            setNewItem({
-                              ...newItem,
-                              totalFee: +e.target.value,
-                            })
-                          }
-                        />
+                        <b>{summary.totalFee}</b>
                       </TableCell>
                       <TableCell>
-                        <TextField
-                          type="number"
-                          value={newItem.discount}
-                          onChange={(e) =>
-                            setNewItem({
-                              ...newItem,
-                              discount: +e.target.value,
-                            })
-                          }
-                        />
+                        <b>{summary.discount}</b>
                       </TableCell>
                       <TableCell>
-                        <TextField
-                          type="number"
-                          value={newItem.received}
-                          onChange={(e) =>
-                            setNewItem({
-                              ...newItem,
-                              received: +e.target.value,
-                            })
-                          }
-                        />
+                        <b>{summary.received}</b>
                       </TableCell>
-                      <TableCell align="right">
-                        <IconButton color="success" onClick={handleSaveNew}>
-                          <SaveIcon />
-                        </IconButton>
+                      <TableCell>
+                        <b>Payable: {summary.payable}</b>
                       </TableCell>
                     </TableRow>
-                  )}
+                  </TableBody>
+                </Table>
 
-                  {/* Summary row */}
-                  <TableRow sx={{ backgroundColor: "#f9f9f9" }}>
-                    <TableCell>
-                      <b>Summary</b>
-                    </TableCell>
-                    <TableCell>
-                      <b>{summary.totalFee}</b>
-                    </TableCell>
-                    <TableCell>
-                      <b>{summary.discount}</b>
-                    </TableCell>
-                    <TableCell>
-                      <b>{summary.received}</b>
-                    </TableCell>
-                    <TableCell>
-                      <b>Payable: {summary.payable}</b>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-
-              <Box sx={{ mt: 2, textAlign: "right" }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<AddIcon />}
-                  onClick={() => handleAddRow(voucher.month)}
-                >
-                  Add Item
-                </Button>
-              </Box>
-            </Collapse>
-          </Paper>
-        );
-      })}
+                <Box sx={{ mt: 2, textAlign: "right" }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<AddIcon />}
+                    onClick={() => handleAddRow(voucher.id)}
+                  >
+                    Add Item
+                  </Button>
+                </Box>
+              </Collapse>
+            </Paper>
+          );
+        })}
       <AddFeePopup open={openAddFee} onClose={handleCloseAddFee} />
       <EditFeePopup open={openEditFee} onClose={handleCloseEditFee} />
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={6000}
+        onClose={() => setSuccessMessage("")}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => setSuccessMessage("")}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={!!errorMessage}
+        autoHideDuration={6000}
+        onClose={clearErrors}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert onClose={clearErrors} severity="error" sx={{ width: "100%" }}>
+          {errorMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
