@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Container,
   Paper,
   Typography,
   IconButton,
@@ -179,7 +178,7 @@ const StudentReportCardPage = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 3 }}>
+    <Box sx={{ width: "100%" }}>
       {/* Back + Print All Buttons */}
       <Box sx={{ mb: 3, display: "flex", justifyContent: "space-between" }}>
         <Button
@@ -365,7 +364,7 @@ const StudentReportCardPage = () => {
           </Paper>
         );
       })}
-    </Container>
+    </Box>
   );
 };
 

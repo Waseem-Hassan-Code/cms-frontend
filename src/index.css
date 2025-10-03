@@ -1,8 +1,35 @@
 @import "tailwindcss";
 
-/* Plugins */
-@plugin '@tailwindcss/forms';
-@plugin '@tailwindcss/typography';
+/* Material-UI input overrides to prevent double borders */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+input[type="password"],
+textarea,
+select {
+  /* Reset any Tailwind form styles that might conflict */
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
 
-/* Class based dark mode */
-@custom-variant dark (&:where(.dark, .dark *));
+/* Ensure Material-UI components take precedence */
+.MuiOutlinedInput-root {
+  border: none !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-width: 1px !important;
+}
+
+/* Global scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Remove focus outline for non-keyboard users */
+*:focus:not(:focus-visible) {
+  outline: none;
+}

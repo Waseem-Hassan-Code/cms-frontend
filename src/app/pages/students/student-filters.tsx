@@ -64,23 +64,23 @@ const StudentFilters = () => {
 
   return (
     <Paper
-      elevation={4}
+      elevation={3}
       sx={{
-        p: { xs: 2, sm: 3 },
-        mb: 3,
-        borderRadius: 3,
+        p: { xs: 2, sm: 2.5 },
+        mb: 2,
+        borderRadius: 2,
         background: `linear-gradient(135deg, #f8fafc 0%, ${theme.palette.primary.light} 100%)`,
-        boxShadow: "0 4px 24px 0 rgba(0,0,0,0.07)",
+        boxShadow: "0 2px 12px 0 rgba(0,0,0,0.06)",
       }}
     >
       <Grid
         container
-        spacing={2}
+        spacing={{ xs: 2, sm: 2 }}
         alignItems="center"
         justifyContent="flex-start"
         sx={{ flexWrap: "wrap" }}
       >
-        <Grid size={{ xs: 12, sm: 4, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
             select
             fullWidth
@@ -118,7 +118,7 @@ const StudentFilters = () => {
           </TextField>
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 4, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
             select
             fullWidth
@@ -157,7 +157,7 @@ const StudentFilters = () => {
           </TextField>
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 4, md: 6 }}>
+        <Grid size={{ xs: 12, sm: 12, md: 6 }}>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <TextField
               fullWidth

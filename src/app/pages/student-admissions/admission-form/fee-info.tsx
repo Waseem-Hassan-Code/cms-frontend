@@ -21,6 +21,7 @@ import {
 import { clearFeeTypes } from "../../../../redux/fee-details/fee-detail-slice";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { useFeeTypes } from "../../../contexts/fee-types-context";
 
 interface FeeInfoStepProps {
   control: any;
@@ -53,28 +54,29 @@ const FeeInfoStep = ({ control, errors, setValue }: FeeInfoStepProps) => {
     defaultValue: 0,
   });
 
-  const { feeDetails, admissionVoucher } = useSelector(
+  const { admissionVoucher, feeDetails } = useSelector(
     (state: RootState) => state.feeDetails
   );
 
-  const { settings } = useSelector(
-    (state: RootState) => state.applicationSettings
-  );
+  const { feeTypes } = useFeeTypes(); // Use the context for fee types
 
+  // Fallback to Redux state if context doesn't have fee types
+  const availableFeeTypes =
+    feeTypes && feeTypes.length > 0 ? feeTypes : feeDetails || [];
   const dispatch = useDispatch<AppDispatch>();
   const { studentId } = useSelector(
     (state: RootState) => state.studentAdmission
   );
 
   useEffect(() => {
-    if (!settings?.feeDetails || settings.feeDetails.length === 0) {
-      dispatch(getFeeTypes());
+    dispatch(getFeeTypes());
+    if (studentId) {
       dispatch(getAdmissionVoucher({ id: studentId! }));
     }
     return () => {
       dispatch(clearFeeTypes());
     };
-  }, [dispatch]);
+  }, [dispatch, studentId]);
 
   useEffect(() => {
     if (admissionVoucher) {
@@ -98,14 +100,14 @@ const FeeInfoStep = ({ control, errors, setValue }: FeeInfoStepProps) => {
 
       setValue(
         "voucherMonth",
-        admissionVoucher.voucherMonth
-          ? new Date(admissionVoucher.voucherMonth)
+        admissionVoucher.voucherMonthYear
+          ? new Date(admissionVoucher.voucherMonthYear)
           : null
       );
     }
   }, [admissionVoucher, setValue]);
 
-  const selectedFeeDetails = (feeDetails || [])
+  const selectedFeeDetails = (availableFeeTypes || [])
     .filter((opt) => selectedFees.some((fee) => fee.feeTypeId === opt.id))
     .map((opt) => ({
       ...opt,
@@ -228,7 +230,7 @@ const FeeInfoStep = ({ control, errors, setValue }: FeeInfoStepProps) => {
                       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                         {selected.map((value) => {
                           const [id, amount] = value.split(":");
-                          const fee = settings?.feeDetails?.find(
+                          const fee = availableFeeTypes?.find(
                             (f) => f.id === id
                           );
                           return (
@@ -251,7 +253,7 @@ const FeeInfoStep = ({ control, errors, setValue }: FeeInfoStepProps) => {
                       borderRadius: 2,
                     }}
                   >
-                    {(settings?.feeDetails || []).map((fee) => (
+                    {(availableFeeTypes || []).map((fee) => (
                       <MenuItem
                         key={fee.id}
                         value={`${fee.id}:${fee.feeAmount}`}
@@ -370,117 +372,255 @@ const FeeInfoStep = ({ control, errors, setValue }: FeeInfoStepProps) => {
           </Grid>
         </Grid>
 
-        {/* Voucher */}
+        {/* Modern Fee Voucher */}
         <Box
           sx={{
             mt: 4,
-            p: { xs: 2, sm: 3 },
-            borderRadius: 3,
-            background: "linear-gradient(135deg, #f8fafc 0%, #e3f2fd 100%)",
-            boxShadow: "0 8px 32px 0 rgba(0,0,0,0.07)",
-            border: "1px solid #e3e3e3",
-            maxWidth: 500,
+            p: 0,
+            borderRadius: 4,
+            background: "#fff",
+            boxShadow: "0 12px 40px 0 rgba(0,0,0,0.08)",
+            border: "1px solid #f0f4f8",
+            maxWidth: 600,
             mx: "auto",
+            overflow: "hidden",
           }}
         >
-          <Typography
-            variant="h6"
-            gutterBottom
+          {/* Header */}
+          <Box
             sx={{
-              fontWeight: 700,
-              color: "primary.main",
-              letterSpacing: 1,
-              mb: 2,
+              background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+              color: "#fff",
+              p: 3,
               textAlign: "center",
+              position: "relative",
+              "&::after": {
+                content: '""',
+                position: "absolute",
+                bottom: -10,
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: 0,
+                height: 0,
+                borderLeft: "10px solid transparent",
+                borderRight: "10px solid transparent",
+                borderTop: "10px solid #1976d2",
+              },
             }}
           >
-            Fee Voucher
-          </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              mb: 1,
-              fontWeight: 600,
-              color: "primary.dark",
-              borderBottom: "1.5px solid #b3c2e0",
-              pb: 1,
-            }}
-          >
-            <Typography variant="subtitle2">Fee Type</Typography>
-            <Typography variant="subtitle2">Amount (Rs.)</Typography>
-          </Box>
-          {selectedFeeDetails.map((fee) => (
-            <Box
-              key={fee.id}
+            <Typography
+              variant="h5"
               sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                py: 0.5,
-                borderBottom: "1px dashed #e0e0e0",
+                fontWeight: 700,
+                letterSpacing: 1.2,
+                textShadow: "0 2px 4px rgba(0,0,0,0.2)",
               }}
             >
-              <Typography sx={{ color: "primary.dark" }}>
-                {fee.feeType}
-              </Typography>
-              <Typography sx={{ fontWeight: 500 }}>{fee.feeAmount}</Typography>
-            </Box>
-          ))}
-          {tuitionFee > 0 && (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                py: 0.5,
-                borderBottom: "1px dashed #e0e0e0",
-              }}
-            >
-              <Typography sx={{ color: "primary.dark" }}>
-                Tuition Fee
-              </Typography>
-              <Typography sx={{ fontWeight: 500 }}>{tuitionFee}</Typography>
-            </Box>
-          )}
-          <Box
-            sx={{
-              borderTop: "2px solid #b3c2e0",
-              mt: 2,
-              pt: 1,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              background: "#e3f2fd",
-              borderRadius: 2,
-              px: 2,
-              py: 1,
-            }}
-          >
-            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-              Total
+              📋 Fee Voucher
             </Typography>
             <Typography
-              variant="h6"
+              variant="body2"
               sx={{
-                fontWeight: 800,
-                color: "primary.main",
-                letterSpacing: 1,
+                opacity: 0.9,
+                mt: 0.5,
+                fontWeight: 500,
               }}
             >
-              {totalAmount}
+              Admission Fee Details
             </Typography>
           </Box>
-          <Typography
-            variant="body2"
-            sx={{
-              mt: 2,
-              color: "primary.dark",
-              fontStyle: "italic",
-              textAlign: "right",
-              fontWeight: 500,
-            }}
-          >
-            {numberToWords(totalAmount)}
-          </Typography>
+
+          {/* Content */}
+          <Box sx={{ p: 3 }}>
+            {/* Fee Items */}
+            <Box sx={{ mb: 3 }}>
+              {selectedFeeDetails.map((fee, index) => (
+                <Box
+                  key={fee.id}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    py: 2,
+                    px: 2,
+                    mb: 1.5,
+                    borderRadius: 2,
+                    backgroundColor: index % 2 === 0 ? "#f8fafc" : "#fff",
+                    border: "1px solid #e2e8f0",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      backgroundColor: "#e3f2fd",
+                      transform: "translateY(-1px)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                    },
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        backgroundColor: "primary.main",
+                        mr: 2,
+                      }}
+                    />
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontWeight: 600,
+                        color: "#1a202c",
+                      }}
+                    >
+                      {fee.feeType}
+                    </Typography>
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      color: "primary.main",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    Rs. {fee.feeAmount.toLocaleString()}
+                  </Typography>
+                </Box>
+              ))}
+
+              {tuitionFee > 0 && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    py: 2,
+                    px: 2,
+                    mb: 1.5,
+                    borderRadius: 2,
+                    backgroundColor: "#fff3cd",
+                    border: "1px solid #ffeaa7",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      backgroundColor: "#fff8e1",
+                      transform: "translateY(-1px)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                    },
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        backgroundColor: "#f39c12",
+                        mr: 2,
+                      }}
+                    />
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontWeight: 600,
+                        color: "#1a202c",
+                      }}
+                    >
+                      Tuition Fee
+                    </Typography>
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      color: "#f39c12",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    Rs. {tuitionFee.toLocaleString()}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+
+            {/* Total Section */}
+            <Box
+              sx={{
+                background: "linear-gradient(135deg, #e8f5e8, #c8e6c9)",
+                borderRadius: 3,
+                p: 3,
+                border: "2px solid #4caf50",
+                textAlign: "center",
+                boxShadow: "0 4px 16px rgba(76, 175, 80, 0.2)",
+              }}
+            >
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 600,
+                  color: "#2e7d32",
+                  mb: 1,
+                  textTransform: "uppercase",
+                  letterSpacing: 1,
+                  fontSize: "0.9rem",
+                }}
+              >
+                Total Amount
+              </Typography>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 900,
+                  color: "#1b5e20",
+                  fontFamily: "monospace",
+                  letterSpacing: 2,
+                  textShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                }}
+              >
+                Rs. {totalAmount.toLocaleString()}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  mt: 2,
+                  color: "#2e7d32",
+                  fontStyle: "italic",
+                  fontWeight: 500,
+                  textAlign: "center",
+                  backgroundColor: "rgba(255,255,255,0.7)",
+                  borderRadius: 2,
+                  p: 1.5,
+                  border: "1px dashed #4caf50",
+                }}
+              >
+                {numberToWords(totalAmount)}
+              </Typography>
+            </Box>
+
+            {/* Footer Note */}
+            <Box
+              sx={{
+                mt: 3,
+                p: 2,
+                backgroundColor: "#f8fafc",
+                borderRadius: 2,
+                border: "1px solid #e2e8f0",
+                textAlign: "center",
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "#64748b",
+                  fontStyle: "italic",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                📄 Please keep this voucher for your records
+              </Typography>
+            </Box>
+          </Box>
         </Box>
       </Box>
     </LocalizationProvider>

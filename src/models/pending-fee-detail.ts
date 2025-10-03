@@ -14,7 +14,7 @@ export interface FeeVouchersDto {
 }
 
 export interface FeeVoucherItemsDto {
-  id: string; // Guid
+  id: string | null; // Guid
   feeVoucherId: string; // Guid
   feeTypeId: string; // Guid
   feeTypeName: string;

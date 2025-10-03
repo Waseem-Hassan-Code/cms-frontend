@@ -1,4 +1,4 @@
-import { Box, Container } from "@mui/material";
+import { Box } from "@mui/material";
 import StudentGrid from "./student-grid";
 import StudentDetail from "./student-detail/student-detail";
 import StudentFilters from "./student-filters";
@@ -37,7 +37,7 @@ const StudentPage = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+    <Box sx={{ width: "100%" }}>
       {!selectedStudentId ? (
         <>
           <StudentFilters />
@@ -52,7 +52,7 @@ const StudentPage = () => {
           onBack={handleBackClick}
         />
       )}
-    </Container>
+    </Box>
   );
 };
 

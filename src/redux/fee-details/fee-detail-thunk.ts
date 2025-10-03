@@ -42,7 +42,7 @@ export const getAdmissionVoucher = createAsyncThunk<
 
 export const addFeeVoucher = createAsyncThunk<
   ApiResponse<string>,
-  StudentFeeVoucher,
+  StudentFeeVoucher, // Use camelCase interface - backend auto-converts to PascalCase
   { rejectValue: string }
 >("FeeDetails/addFeeVoucher", async (voucher, { rejectWithValue }) => {
   try {

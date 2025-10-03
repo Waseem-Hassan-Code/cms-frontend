@@ -4,6 +4,7 @@ import {
   getApplicationSettings,
   updateFeeVoucherItem,
   deleteFeeVoucherItem,
+  addFeeVoucherItem,
 } from "./settings-thunk";
 
 export interface ApplicationSettingState {
@@ -15,6 +16,8 @@ export interface ApplicationSettingState {
   updateError: string | null;
   deleting: boolean;
   deleteError: string | null;
+  adding: boolean;
+  addError: string | null;
 }
 
 const initialState: ApplicationSettingState = {
@@ -26,6 +29,8 @@ const initialState: ApplicationSettingState = {
   updateError: null,
   deleting: false,
   deleteError: null,
+  adding: false,
+  addError: null,
 };
 
 const applicationSettingSlice = createSlice({
@@ -43,6 +48,9 @@ const applicationSettingSlice = createSlice({
     },
     clearDeleteError: (state) => {
       state.deleteError = null;
+    },
+    clearAddError: (state) => {
+      state.addError = null;
     },
   },
   extraReducers: (builder) => {
@@ -94,10 +102,30 @@ const applicationSettingSlice = createSlice({
           (action.payload as string | undefined) ??
           action.error.message ??
           "Failed to delete fee voucher item";
+      })
+      // Add Fee Voucher Item
+      .addCase(addFeeVoucherItem.pending, (state) => {
+        state.adding = true;
+        state.addError = null;
+      })
+      .addCase(addFeeVoucherItem.fulfilled, (state) => {
+        state.adding = false;
+        // Add will be handled in the component by updating local state
+      })
+      .addCase(addFeeVoucherItem.rejected, (state, action) => {
+        state.adding = false;
+        state.addError =
+          (action.payload as string | undefined) ??
+          action.error.message ??
+          "Failed to add fee voucher item";
       });
   },
 });
 
-export const { clearSettings, clearUpdateError, clearDeleteError } =
-  applicationSettingSlice.actions;
+export const {
+  clearSettings,
+  clearUpdateError,
+  clearDeleteError,
+  clearAddError,
+} = applicationSettingSlice.actions;
 export default applicationSettingSlice.reducer;

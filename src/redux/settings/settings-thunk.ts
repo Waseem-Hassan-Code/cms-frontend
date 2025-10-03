@@ -62,3 +62,22 @@ export const deleteFeeVoucherItem = createAsyncThunk<
     }
   }
 );
+
+export const addFeeVoucherItem = createAsyncThunk<
+  ApiResponse<FeeVoucherItemsDto>,
+  FeeVoucherItemsDto,
+  { rejectValue: string }
+>("Settings/addFeeVoucherItem", async (feeVoucherItem, { rejectWithValue }) => {
+  try {
+    feeVoucherItem.id = null;
+    const response = await cms_base_api.post<ApiResponse<FeeVoucherItemsDto>>(
+      "EnrolledStudent/add-fee-voucher-item",
+      feeVoucherItem
+    );
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(
+      error?.response?.data?.message ?? "Failed to add fee voucher item"
+    );
+  }
+});

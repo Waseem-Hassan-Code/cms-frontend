@@ -103,6 +103,11 @@ export const CustomDataGrid: FC<CustomDataGridProps> = ({
         overflow: "auto",
         background: isLight ? "white" : undefined,
         position: "relative",
+        borderRadius: 2,
+        "& .MuiDataGrid-root": {
+          border: "none",
+          borderRadius: 2,
+        },
       }}
     >
       <DataGrid
@@ -133,29 +138,73 @@ export const CustomDataGrid: FC<CustomDataGridProps> = ({
           ),
           loadingOverlay: () => (
             <GridOverlay>
-              <img src="/assets/svgs/loader.svg" alt="loader" />
+              <Typography variant="subtitle2" color="text.secondary">
+                Loading...
+              </Typography>
             </GridOverlay>
           ),
         }}
         loading={filterLoading || loading}
         sx={{
           width: "100%",
+          border: "none",
+          borderRadius: 2,
+          "& .MuiDataGrid-main": {
+            borderRadius: 2,
+          },
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: "#f8f9fa",
+            borderRadius: "12px 12px 0 0",
+            fontWeight: 600,
+            fontSize: "0.9rem",
+            color: "text.primary",
+          },
           "& .MuiDataGrid-columnHeader": {
             height: 56,
+            "&:focus": {
+              outline: "none",
+            },
+          },
+          "& .MuiDataGrid-cell": {
+            borderBottom: "1px solid #f0f0f0",
+            fontSize: "0.875rem",
+            "&:focus": {
+              outline: "none",
+            },
+          },
+          "& .MuiDataGrid-row": {
+            "&:hover": {
+              backgroundColor: "rgba(25, 118, 210, 0.04)",
+              cursor: "pointer",
+            },
+            "&.Mui-selected": {
+              backgroundColor: "rgba(25, 118, 210, 0.08)",
+              "&:hover": {
+                backgroundColor: "rgba(25, 118, 210, 0.12)",
+              },
+            },
+          },
+          "& .MuiDataGrid-footerContainer": {
+            borderTop: "1px solid #e0e0e0",
+            backgroundColor: "#fafafa",
+            borderRadius: "0 0 12px 12px",
+          },
+          "& .MuiTablePagination-root": {
+            fontSize: "0.875rem",
           },
           "@keyframes highlightFade": {
             "0%": {
-              backgroundColor: "#8E33FF",
+              backgroundColor: "rgba(25, 118, 210, 0.2)",
             },
             "50%": {
-              backgroundColor: "#aa66ff",
+              backgroundColor: "rgba(25, 118, 210, 0.1)",
             },
             "100%": {
-              backgroundColor: "#8E33FF",
+              backgroundColor: "rgba(25, 118, 210, 0.2)",
             },
           },
           "& .MuiDataGrid-row.highlight-inline": {
-            backgroundColor: "rgba(218, 155, 252, 0.5)",
+            backgroundColor: "rgba(25, 118, 210, 0.1)",
             transition: "background-color 0.5s ease-in-out",
           },
         }}

@@ -7,6 +7,8 @@ import theme from "./theme";
 import { Toaster } from "sonner";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
+import { FeeTypesProvider } from "./app/contexts/fee-types-context";
+
 function App() {
   return (
     <>
@@ -14,7 +16,9 @@ function App() {
         <Provider store={store}>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <AppRoutes />
+            <FeeTypesProvider>
+              <AppRoutes />
+            </FeeTypesProvider>
             <Toaster richColors position="top-right" />
           </ThemeProvider>
         </Provider>

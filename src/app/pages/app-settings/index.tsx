@@ -30,7 +30,7 @@ export default function AppSettings() {
       sx={{
         p: { xs: 2, md: 4 },
         background: "linear-gradient(135deg, #f8fafc 0%, #e3f2fd 100%)",
-        minHeight: "100vh",
+        width: "100%",
       }}
     >
       {/* Title + Button Row */}

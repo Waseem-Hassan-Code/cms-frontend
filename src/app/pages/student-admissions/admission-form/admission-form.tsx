@@ -189,13 +189,18 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
 
   const onSubmitFee = async (data: FeeInfoData) => {
     try {
+      // Use camelCase properties - backend auto-converts to PascalCase
       var obj: StudentFeeVoucher = {
         studentId: studentId!,
-        dueDate: data.dueDate,
-        voucherMonth: data.voucherMonth,
-        feeVoucherItems: data.selectedFeeTypes,
-        tutionFee: data.tuitionFee,
-        remarks: data.remarks,
+        dueDate: data.dueDate
+          ? data.dueDate.toISOString() // DateTime? expects full ISO string
+          : null,
+        voucherMonthYear: data.voucherMonth
+          ? data.voucherMonth.toISOString().split("T")[0] // DateOnly? expects YYYY-MM-DD format
+          : null,
+        feeVoucherItems: data.selectedFeeTypes || [], // Ensure it's never undefined
+        tutionFee: data.tuitionFee || 0, // Ensure it has a default value
+        remarks: data.remarks || "", // Provide default empty string
       };
 
       dispatch(addFeeVoucher(obj))
@@ -215,8 +220,35 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-      <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+    <Paper
+      elevation={3}
+      sx={{
+        p: { xs: 2, sm: 3, md: 4 },
+        borderRadius: 3,
+        maxWidth: "100%",
+        mx: "auto",
+        background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+      }}
+    >
+      <Stepper
+        activeStep={activeStep}
+        alternativeLabel
+        sx={{
+          mb: 4,
+          "& .MuiStepConnector-line": {
+            borderTopWidth: "2px",
+          },
+          "& .MuiStepIcon-root": {
+            fontSize: "1.5rem",
+            "&.Mui-active": {
+              color: "primary.main",
+            },
+            "&.Mui-completed": {
+              color: "success.main",
+            },
+          },
+        }}
+      >
         {steps.map((label, index) => (
           <Step
             key={label}
@@ -225,8 +257,9 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
             sx={{
               cursor: "pointer",
               "& .MuiStepLabel-label": {
-                color: activeStep === index ? "green" : "inherit",
-                fontWeight: activeStep === index ? "bold" : "normal",
+                color: activeStep === index ? "primary.main" : "text.secondary",
+                fontWeight: activeStep === index ? 600 : 400,
+                fontSize: { xs: "0.8rem", sm: "0.9rem" },
               },
             }}
           >
@@ -265,15 +298,40 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
             />
           )}
 
-          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              mt: 4,
+              gap: 2,
+              flexDirection: { xs: "column", sm: "row" },
+            }}
+          >
             <Button
               variant="outlined"
               onClick={activeStep === 0 ? onClose : handleBack}
-              sx={{ px: 4 }}
+              sx={{
+                px: 4,
+                py: 1.5,
+                borderRadius: 2,
+                fontWeight: 600,
+                order: { xs: 2, sm: 1 },
+              }}
             >
               {activeStep === 0 ? "Cancel" : "Back"}
             </Button>
-            <Button variant="contained" onClick={handleNext} sx={{ px: 4 }}>
+            <Button
+              variant="contained"
+              onClick={handleNext}
+              sx={{
+                px: 4,
+                py: 1.5,
+                borderRadius: 2,
+                fontWeight: 600,
+                background: "linear-gradient(45deg, #1976d2, #42a5f5)",
+                order: { xs: 1, sm: 2 },
+              }}
+            >
               {activeStep === steps.length - 2
                 ? studentAdmitted
                   ? "Continue"
@@ -291,11 +349,40 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
             control={feeControl}
             errors={feeErrors}
           />
-          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-            <Button variant="outlined" onClick={handleBack} sx={{ px: 4 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              mt: 4,
+              gap: 2,
+              flexDirection: { xs: "column", sm: "row" },
+            }}
+          >
+            <Button
+              variant="outlined"
+              onClick={handleBack}
+              sx={{
+                px: 4,
+                py: 1.5,
+                borderRadius: 2,
+                fontWeight: 600,
+                order: { xs: 2, sm: 1 },
+              }}
+            >
               Back
             </Button>
-            <Button variant="contained" type="submit" sx={{ px: 4 }}>
+            <Button
+              variant="contained"
+              type="submit"
+              sx={{
+                px: 4,
+                py: 1.5,
+                borderRadius: 2,
+                fontWeight: 600,
+                background: "linear-gradient(45deg, #2e7d32, #4caf50)",
+                order: { xs: 1, sm: 2 },
+              }}
+            >
               Submit Admission
             </Button>
           </Box>

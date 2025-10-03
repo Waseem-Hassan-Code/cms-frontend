@@ -1,11 +1,12 @@
 // src/pages/admissions/AdmissionPage.tsx
 import { useEffect, useState } from "react";
-import { Box, Button, Container, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import AdmissionGrid from "./admission-grid";
-import AdmissionForm from "./admission-form/admission-form";
+
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../../redux/store";
 import { clearStudentId } from "../../../redux/student-admission/student-admission-slice";
+import AdmissionForm from "./admission-form/admission-form";
 
 const AdmissionPage = () => {
   const [openForm, setOpenForm] = useState(false);
@@ -23,13 +24,13 @@ const AdmissionPage = () => {
   }, [studentId]);
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+    <Box sx={{ width: "100%", height: "100%" }}>
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 4,
+          mb: 2,
         }}
       >
         <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
@@ -56,7 +57,7 @@ const AdmissionPage = () => {
           }}
         />
       )}
-    </Container>
+    </Box>
   );
 };
 
