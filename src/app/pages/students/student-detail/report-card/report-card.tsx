@@ -29,6 +29,7 @@ import PrintIcon from "@mui/icons-material/Print";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
 import {
   getResultCardsByStudentId,
   deleteResultCard,
@@ -47,9 +48,12 @@ const StudentReportCardPage = () => {
   const { studentId } = useParams<{ studentId: string }>();
   const dispatch = useDispatch<AppDispatch>();
 
-  const { resultCards, loading } = useSelector(
+  const { studentResultCards, loading } = useSelector(
     (state: RootState) => state.resultCards
   );
+
+  // Use studentResultCards instead of resultCards for this component
+  const resultCards = studentResultCards;
 
   const [expandedExam, setExpandedExam] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -87,21 +91,28 @@ const StudentReportCardPage = () => {
 
   const handleDeleteResultCard = async (id: string) => {
     try {
-      await dispatch(deleteResultCard(id));
-      setDeleteDialogOpen(false);
-      setResultCardToDelete(null);
-      // Refresh the data
-      if (studentId) {
-        dispatch(getResultCardsByStudentId(studentId));
+      const result = await dispatch(deleteResultCard(id));
+
+      if (deleteResultCard.fulfilled.match(result)) {
+        toast.success("Result card deleted successfully!");
+        setDeleteDialogOpen(false);
+        setResultCardToDelete(null);
+        // Refresh the data
+        if (studentId) {
+          dispatch(getResultCardsByStudentId(studentId));
+        }
+      } else {
+        toast.error("Failed to delete result card");
       }
     } catch (error) {
       console.error("Error deleting result card:", error);
+      toast.error("Failed to delete result card");
     }
   };
 
   const handleAddResultCard = async () => {
     if (!examTitle.trim() || !examDate || !studentId) {
-      console.error("Please fill in all required fields");
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -120,14 +131,21 @@ const StudentReportCardPage = () => {
     };
 
     try {
-      await dispatch(createResultCard(resultCardData));
-      handleCloseAddDialog();
-      // Refresh the data
-      if (studentId) {
-        dispatch(getResultCardsByStudentId(studentId));
+      const result = await dispatch(createResultCard(resultCardData));
+
+      if (createResultCard.fulfilled.match(result)) {
+        toast.success("Result card created successfully!");
+        handleCloseAddDialog();
+        // Refresh the data
+        if (studentId) {
+          dispatch(getResultCardsByStudentId(studentId));
+        }
+      } else {
+        toast.error("Failed to create result card");
       }
     } catch (error) {
       console.error("Error creating result card:", error);
+      toast.error("Failed to create result card");
     }
   };
 
@@ -149,7 +167,7 @@ const StudentReportCardPage = () => {
 
   const handleUpdateResultCard = async () => {
     if (!editingResultCard || !examTitle.trim() || !examDate) {
-      console.error("Please fill in all required fields");
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -161,14 +179,21 @@ const StudentReportCardPage = () => {
     };
 
     try {
-      await dispatch(updateResultCard(updateData));
-      handleCloseEditDialog();
-      // Refresh the data
-      if (studentId) {
-        dispatch(getResultCardsByStudentId(studentId));
+      const result = await dispatch(updateResultCard(updateData));
+
+      if (updateResultCard.fulfilled.match(result)) {
+        toast.success("Result card updated successfully!");
+        handleCloseEditDialog();
+        // Refresh the data
+        if (studentId) {
+          dispatch(getResultCardsByStudentId(studentId));
+        }
+      } else {
+        toast.error("Failed to update result card");
       }
     } catch (error) {
       console.error("Error updating result card:", error);
+      toast.error("Failed to update result card");
     }
   };
 
