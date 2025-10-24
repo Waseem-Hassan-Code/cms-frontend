@@ -69,7 +69,7 @@ export interface ResultCardDto {
 
 export interface CreateResultCardDto {
   examTitle: string;
-  examDate: string; // ISO date string
+  examDate: string;
   studentId: string;
   classId: string;
   remarks: string;

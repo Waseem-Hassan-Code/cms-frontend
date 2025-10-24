@@ -1,5 +1,8 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { ResultCardDto } from "../../models/school-settings";
+import type {
+  ResultCardDto,
+  ResultEntryDto,
+} from "../../models/school-settings";
 import {
   getAllResultCards,
   getResultCardById,
@@ -10,6 +13,7 @@ import {
   updateResultEntry,
   deleteResultCard,
   deleteResultEntry,
+  createResultEntry,
 } from "./result-card-thunk";
 
 interface ResultCardsState {
@@ -188,6 +192,20 @@ const resultCardsSlice = createSlice({
         state.loading = false;
       })
       .addCase(updateResultEntry.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    // CREATE RESULT ENTRY
+    builder
+      .addCase(createResultEntry.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createResultEntry.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(createResultEntry.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

@@ -21,10 +21,13 @@ export default function StudentExamResultsPanel({
   studentId,
 }: StudentExamResultsProps) {
   const dispatch = useDispatch<AppDispatch>();
-  const { resultCards, loading } = useSelector(
+  const { studentResultCards, loading } = useSelector(
     (state: RootState) => state.resultCards
   );
   const navigate = useNavigate();
+
+  // Use studentResultCards with safety check
+  const resultCards = studentResultCards || [];
 
   useEffect(() => {
     if (studentId) {

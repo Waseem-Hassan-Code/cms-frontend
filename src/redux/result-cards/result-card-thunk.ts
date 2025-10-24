@@ -4,6 +4,7 @@ import type {
   CreateResultCardDto,
   UpdateResultCardDto,
   UpdateResultEntryDto,
+  CreateResultEntryDto,
 } from "../../models/school-settings";
 import type { ApiResponse } from "../../models/api-response";
 import { cms_base_api } from "../../app/middleware/cms-base-api";
@@ -152,6 +153,32 @@ export const updateResultEntry = createAsyncThunk<
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to update result entry"
+      );
+    }
+  }
+);
+
+export const createResultEntry = createAsyncThunk<
+  ApiResponse<any>,
+  { id: string; data: CreateResultEntryDto },
+  { rejectValue: string }
+>(
+  "resultCards/createResultEntry",
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      const response = await cms_base_api.put<ApiResponse<any>>(
+        `/ResultCards/create-entry?id=${id}`,
+        data
+      );
+
+      if (!response.data.isSuccess) {
+        return rejectWithValue(response.data.message);
+      }
+
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to create result entry"
       );
     }
   }
