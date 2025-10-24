@@ -483,7 +483,7 @@ const StudentReportCardPage = () => {
                 <Table sx={{ mt: 2 }}>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Exam Title</TableCell>
+                      <TableCell>Subject Title</TableCell>
                       <TableCell>Marks Obtained</TableCell>
                       <TableCell>Total Marks</TableCell>
                       <TableCell>Percentage</TableCell>
@@ -493,46 +493,67 @@ const StudentReportCardPage = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    <TableRow
-                      sx={{
-                        backgroundColor:
-                          resultCard.percentage < 40 ? "#ffe5e5" : "inherit",
-                      }}
-                    >
-                      <TableCell>{resultCard.examTitle}</TableCell>
-                      <TableCell>{resultCard.obtainedMarks}</TableCell>
-                      <TableCell>{resultCard.totalMarks}</TableCell>
-                      <TableCell>{resultCard.percentage}%</TableCell>
-                      <TableCell>{resultCard.grade}</TableCell>
-                      <TableCell>
-                        <Tooltip
-                          title={resultCard.remarks || "No remarks"}
-                          arrow
-                        >
-                          <span>
-                            {resultCard.remarks
-                              ? `${resultCard.remarks.slice(0, 20)}...`
-                              : "No remarks"}
-                          </span>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell align="right">
-                        <IconButton
-                          onClick={() => handleEditResultCard(resultCard)}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton
-                          color="error"
-                          onClick={() => {
-                            setResultCardToDelete(resultCard.id);
-                            setDeleteDialogOpen(true);
+                    {resultCard.resultEntries &&
+                    resultCard.resultEntries.length > 0 ? (
+                      resultCard.resultEntries.map((entry: any) => (
+                        <TableRow
+                          sx={{
+                            backgroundColor:
+                              resultCard.percentage < 40
+                                ? "#ffe5e5"
+                                : "inherit",
                           }}
                         >
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
+                          <TableCell>{entry.subjectName}</TableCell>
+                          <TableCell>{entry.obtainedMarks}</TableCell>
+                          <TableCell>{entry.totalMarks}</TableCell>
+                          <TableCell>
+                            {entry.totalMarks > 0
+                              ? (
+                                  (entry.obtainedMarks / entry.totalMarks) *
+                                  100
+                                ).toFixed(2)
+                              : 0}
+                            %
+                          </TableCell>
+                          <TableCell>{entry.grade}</TableCell>
+                          <TableCell>
+                            <Tooltip
+                              title={entry.remarks || "No remarks"}
+                              arrow
+                            >
+                              <span>
+                                {entry.remarks
+                                  ? `${entry.remarks.slice(0, 20)}...`
+                                  : "No remarks"}
+                              </span>
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell align="right">
+                            <IconButton
+                              onClick={() => handleEditResultCard(resultCard)}
+                            >
+                              <EditIcon />
+                            </IconButton>
+                            <IconButton
+                              color="error"
+                              onClick={() => {
+                                setResultCardToDelete(entry.id);
+                                setDeleteDialogOpen(true);
+                              }}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={4} align="center">
+                          No subject entries found.
+                        </TableCell>
+                      </TableRow>
+                    )}
 
                     {/* Summary */}
                     <TableRow sx={{ backgroundColor: "#f9f9f9" }}>
@@ -540,10 +561,10 @@ const StudentReportCardPage = () => {
                         <b>Summary</b>
                       </TableCell>
                       <TableCell>
-                        <b>{summary.obtained}</b>
+                        <b>{resultCard.obtainedMarks}</b>
                       </TableCell>
                       <TableCell>
-                        <b>{summary.totalMarks}</b>
+                        <b>{resultCard.totalMarks}</b>
                       </TableCell>
                       <TableCell colSpan={4} align="right">
                         <Typography
