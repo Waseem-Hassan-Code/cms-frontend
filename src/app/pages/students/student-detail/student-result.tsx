@@ -1,6 +1,18 @@
-import { Box, Typography, Paper, Divider, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Paper,
+  Divider,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getResultCardsByStudentId } from "../../../../redux/result-cards/result-card-thunk";
+import type { RootState, AppDispatch } from "../../../../redux/store";
+import type { ResultCardDto } from "../../../../models/school-settings";
 
 interface StudentExamResultsProps {
   studentId: string;
@@ -8,15 +20,63 @@ interface StudentExamResultsProps {
 export default function StudentExamResultsPanel({
   studentId,
 }: StudentExamResultsProps) {
-  const examResults = {
-    totalSubjects: 6,
-    passedSubjects: 5,
-    failedSubjects: 1,
-    percentage: 78.5,
-    resultStatus: "Pass",
-    lastExamDate: "2024-12-18",
-  };
+  const dispatch = useDispatch<AppDispatch>();
+  const { resultCards, loading } = useSelector(
+    (state: RootState) => state.resultCards
+  );
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (studentId) {
+      dispatch(getResultCardsByStudentId(studentId));
+    }
+  }, [dispatch, studentId]);
+
+  // Calculate summary from actual result cards
+  const calculateSummary = () => {
+    if (resultCards.length === 0) {
+      return {
+        totalExams: 0,
+        passedExams: 0,
+        failedExams: 0,
+        averagePercentage: 0,
+        resultStatus: "No Data",
+        lastExamDate: "N/A",
+      };
+    }
+
+    const totalExams = resultCards.length;
+    const passedExams = resultCards.filter(
+      (card: ResultCardDto) => card.percentage >= 40
+    ).length;
+    const failedExams = totalExams - passedExams;
+    const averagePercentage =
+      resultCards.reduce(
+        (sum: number, card: ResultCardDto) => sum + card.percentage,
+        0
+      ) / totalExams;
+    const lastExamDate =
+      resultCards.length > 0
+        ? new Date(
+            Math.max(
+              ...resultCards.map((card: ResultCardDto) =>
+                new Date(card.examDate).getTime()
+              )
+            )
+          ).toLocaleDateString()
+        : "N/A";
+
+    return {
+      totalExams,
+      passedExams,
+      failedExams,
+      averagePercentage: Math.round(averagePercentage * 10) / 10,
+      resultStatus: averagePercentage >= 40 ? "Pass" : "Fail",
+      lastExamDate,
+    };
+  };
+
+  const examResults = calculateSummary();
 
   return (
     <Paper
@@ -36,30 +96,41 @@ export default function StudentExamResultsPanel({
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <BarChartIcon color="primary" sx={{ mr: 1 }} />
           <Typography variant="h6" component="h3">
-            Exam Results
+            Exam Results Summary
           </Typography>
         </Box>
 
         <Divider sx={{ mb: 2 }} />
 
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" color="text.secondary">
-            Total Subjects: {examResults.totalSubjects}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Passed: {examResults.passedSubjects}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Failed: {examResults.failedSubjects}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Last Exam Date: {examResults.lastExamDate}
-          </Typography>
-        </Box>
+        {loading ? (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            py={4}
+          >
+            <CircularProgress size={40} />
+          </Box>
+        ) : (
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Total Exams: {examResults.totalExams}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Passed: {examResults.passedExams}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Failed: {examResults.failedExams}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Last Exam: {examResults.lastExamDate}
+            </Typography>
+          </Box>
+        )}
 
         <Box>
           <Typography variant="body2" color="text.secondary">
-            Percentage: {examResults.percentage}%
+            Average: {examResults.averagePercentage}%
           </Typography>
           <Typography
             variant="body2"

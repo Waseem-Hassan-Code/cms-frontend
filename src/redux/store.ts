@@ -4,10 +4,12 @@ import studentAdmissionSlice from "./student-admission/student-admission-slice";
 import feeDetailSlice from "./fee-details/fee-detail-slice";
 import classSlice from "./school-settings/class-config/class-slice";
 import sectionSlice from "./school-settings/section-config/section-slice";
+import subjectSlice from "./school-settings/subject-config/subject-slice";
 import feeSlice from "./school-settings/fee-config/fee-slice";
 import enrolledStudentSlice from "./enrolled-students/enrolled-student-slice";
 import applicationSettingSlice from "./settings/settings-slice";
 import enrolledStudentsPendingFeeSlice from "./enrolled-students/fee-details/pending-fee-slice";
+import resultCardSlice from "./result-cards/result-card-slice";
 
 export const store = configureStore({
   reducer: {
@@ -15,10 +17,12 @@ export const store = configureStore({
     feeDetails: feeDetailSlice,
     classSettings: classSlice,
     sectionSettings: sectionSlice,
+    subjectSettings: subjectSlice,
     feeSettings: feeSlice,
     enrolledStudents: enrolledStudentSlice,
     applicationSettings: applicationSettingSlice,
     enrolledStudentPendingFeeAndOtherDetails: enrolledStudentsPendingFeeSlice,
+    resultCards: resultCardSlice,
   },
 });
 

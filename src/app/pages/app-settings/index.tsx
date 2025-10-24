@@ -4,6 +4,7 @@ import { LoadingButton } from "@mui/lab";
 import { CheckCircle, Settings, TrendingUp, Shield } from "lucide-react";
 import ClassesGrid from "../../components/app-settings-components/class-grid";
 import SectionsGrid from "../../components/app-settings-components/sections-grid";
+import SubjectsGrid from "../../components/app-settings-components/subjects-grid";
 import FeeTypesGrid from "../../components/app-settings-components/fee-type-grid";
 
 export default function AppSettings() {
@@ -173,7 +174,7 @@ export default function AppSettings() {
 
       {/* Main Content Grid */}
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, lg: 4 }}>
+        <Grid size={{ xs: 12, lg: 6 }}>
           <Paper
             elevation={0}
             sx={{
@@ -207,7 +208,7 @@ export default function AppSettings() {
           </Paper>
         </Grid>
 
-        <Grid size={{ xs: 12, lg: 4 }}>
+        <Grid size={{ xs: 12, lg: 6 }}>
           <Paper
             elevation={0}
             sx={{
@@ -241,7 +242,41 @@ export default function AppSettings() {
           </Paper>
         </Grid>
 
-        <Grid size={{ xs: 12, lg: 4 }}>
+        <Grid size={{ xs: 12, lg: 6 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              background: "white",
+              borderRadius: 3,
+              overflow: "hidden",
+              border: "1px solid #e0e7ff",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              },
+            }}
+          >
+            <Box
+              sx={{
+                background: "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)",
+                p: 2,
+                color: "white",
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Class Subjects
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                Define subjects for each class with codes
+              </Typography>
+            </Box>
+            <SubjectsGrid />
+          </Paper>
+        </Grid>
+
+        <Grid size={{ xs: 12, lg: 6 }}>
           <Paper
             elevation={0}
             sx={{
