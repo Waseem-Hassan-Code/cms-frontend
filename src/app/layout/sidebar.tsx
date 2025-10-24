@@ -10,7 +10,6 @@ import {
   Typography,
   Divider,
   Avatar,
-  useTheme,
 } from "@mui/material";
 import { NavLink, useLocation } from "react-router-dom";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -20,7 +19,6 @@ import ClassIcon from "@mui/icons-material/Class";
 import FactCheckIcon from "@mui/icons-material/FactCheck";
 import SettingsIcon from "@mui/icons-material/Settings";
 import type { JSX } from "react";
-import { blue } from "@mui/material/colors";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 
 const drawerWidth = 280;
@@ -46,7 +44,6 @@ const secondaryNavItems: NavItem[] = [
 
 const Sidebar = () => {
   const location = useLocation();
-  const theme = useTheme();
 
   return (
     <Drawer
@@ -57,9 +54,9 @@ const Sidebar = () => {
         "& .MuiDrawer-paper": {
           width: drawerWidth,
           boxSizing: "border-box",
-          backgroundColor: blue[50],
-          borderRight: "none",
-          boxShadow: theme.shadows[2],
+          background: "linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)",
+          borderRight: "1px solid #e2e8f0",
+          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
         },
       }}
     >
@@ -71,18 +68,19 @@ const Sidebar = () => {
           px: 3,
           py: 3,
           mt: "64px", // Matches Navbar height
-          backgroundColor: blue[100],
-          borderBottom: `1px solid ${blue[200]}`,
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
         }}
       >
         <Avatar
           sx={{
-            bgcolor: blue[600],
+            background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
             width: 40,
             height: 40,
             mr: 2,
             fontWeight: "bold",
-            color: theme.palette.common.white,
+            color: "white",
+            boxShadow: "0 4px 12px rgba(79, 172, 254, 0.4)",
           }}
         >
           ES
@@ -92,7 +90,10 @@ const Sidebar = () => {
           noWrap
           component="div"
           fontWeight="bold"
-          color={blue[800]}
+          sx={{
+            color: "white",
+            textShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+          }}
         >
           EduSystem
         </Typography>
@@ -107,22 +108,28 @@ const Sidebar = () => {
                   selected={location.pathname === path}
                   sx={{
                     borderRadius: 2,
+                    transition: "all 0.2s ease-in-out",
                     "&.Mui-selected": {
-                      backgroundColor: blue[200],
-                      color: blue[800],
+                      background:
+                        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                      color: "white",
+                      boxShadow: "0 4px 12px rgba(102, 126, 234, 0.4)",
                       "&:hover": {
-                        backgroundColor: blue[200],
+                        background:
+                          "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
                       },
                     },
                     "&:hover": {
-                      backgroundColor: blue[100],
+                      backgroundColor: "#e2e8f0",
+                      transform: "translateX(4px)",
                     },
                   }}
                 >
                   <ListItemIcon
                     sx={{
-                      color: location.pathname === path ? blue[800] : blue[600],
+                      color: location.pathname === path ? "white" : "#64748b",
                       minWidth: "40px",
+                      transition: "color 0.2s ease-in-out",
                     }}
                   >
                     {icon}
@@ -131,7 +138,7 @@ const Sidebar = () => {
                     primary={text}
                     primaryTypographyProps={{
                       fontWeight: location.pathname === path ? "600" : "500",
-                      color: location.pathname === path ? blue[900] : blue[700],
+                      color: location.pathname === path ? "white" : "#475569",
                     }}
                   />
                 </ListItemButton>
@@ -140,7 +147,7 @@ const Sidebar = () => {
           ))}
         </List>
 
-        <Divider sx={{ my: 2, borderColor: blue[200] }} />
+        <Divider sx={{ my: 2, borderColor: "#cbd5e0" }} />
 
         <List>
           {secondaryNavItems.map(({ text, icon, path }) => (
@@ -150,19 +157,28 @@ const Sidebar = () => {
                   selected={location.pathname === path}
                   sx={{
                     borderRadius: 2,
+                    transition: "all 0.2s ease-in-out",
                     "&.Mui-selected": {
-                      backgroundColor: blue[200],
-                      color: blue[800],
+                      background:
+                        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                      color: "white",
+                      boxShadow: "0 4px 12px rgba(102, 126, 234, 0.4)",
+                      "&:hover": {
+                        background:
+                          "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                      },
                     },
                     "&:hover": {
-                      backgroundColor: blue[100],
+                      backgroundColor: "#e2e8f0",
+                      transform: "translateX(4px)",
                     },
                   }}
                 >
                   <ListItemIcon
                     sx={{
-                      color: location.pathname === path ? blue[800] : blue[600],
+                      color: location.pathname === path ? "white" : "#64748b",
                       minWidth: "40px",
+                      transition: "color 0.2s ease-in-out",
                     }}
                   >
                     {icon}
@@ -171,7 +187,7 @@ const Sidebar = () => {
                     primary={text}
                     primaryTypographyProps={{
                       fontWeight: location.pathname === path ? "600" : "500",
-                      color: location.pathname === path ? blue[900] : blue[700],
+                      color: location.pathname === path ? "white" : "#475569",
                     }}
                   />
                 </ListItemButton>
@@ -184,17 +200,21 @@ const Sidebar = () => {
       <Box sx={{ p: 3, mt: "auto" }}>
         <Box
           sx={{
-            backgroundColor: blue[100],
+            background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
             borderRadius: 3,
             p: 2,
             textAlign: "center",
-            border: `1px solid ${blue[200]}`,
+            boxShadow: "0 4px 12px rgba(240, 147, 251, 0.4)",
           }}
         >
-          <Typography variant="body2" color={blue[800]} mb={1}>
+          <Typography variant="body2" sx={{ color: "white", mb: 1 }}>
             Need help?
           </Typography>
-          <Typography variant="body2" fontWeight="medium" color={blue[800]}>
+          <Typography
+            variant="body2"
+            fontWeight="medium"
+            sx={{ color: "white" }}
+          >
             Contact Support
           </Typography>
         </Box>

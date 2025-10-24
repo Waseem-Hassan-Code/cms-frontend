@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Box, Grid, Typography, Button } from "@mui/material";
+import { Box, Grid, Typography, Button, Paper, Chip } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Settings, TrendingUp, Shield } from "lucide-react";
 import ClassesGrid from "../../components/app-settings-components/class-grid";
 import SectionsGrid from "../../components/app-settings-components/sections-grid";
 import FeeTypesGrid from "../../components/app-settings-components/fee-type-grid";
@@ -29,81 +29,250 @@ export default function AppSettings() {
     <Box
       sx={{
         p: { xs: 2, md: 4 },
-        background: "linear-gradient(135deg, #f8fafc 0%, #e3f2fd 100%)",
         width: "100%",
       }}
     >
-      {/* Title + Button Row */}
-      <Box
+      {/* Header Section */}
+      <Paper
+        elevation={0}
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
+          background: "white",
+          borderRadius: 3,
+          p: 4,
           mb: 4,
+          border: "1px solid #e0e7ff",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <Typography
-          variant="h5" // smaller than h3
+        <Box
           sx={{
-            fontWeight: 600, // less thick than 800
-            letterSpacing: 0.5,
-            color: "primary.main",
-            textShadow: "0 2px 6px rgba(0,0,0,0.04)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 2,
           }}
         >
-          School Settings
-        </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box
+              sx={{
+                width: 56,
+                height: 56,
+                borderRadius: 2,
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 4px 20px rgba(102, 126, 234, 0.4)",
+              }}
+            >
+              <Settings size={28} color="white" />
+            </Box>
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 700,
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  mb: 0.5,
+                }}
+              >
+                System Configuration
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "text.secondary",
+                  fontWeight: 500,
+                }}
+              >
+                Manage school settings and academic structure
+              </Typography>
+            </Box>
+          </Box>
 
-        {/* Stylish Button */}
-        {success ? (
-          <Button
-            variant="contained"
-            color="success"
-            startIcon={<CheckCircle />}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Chip
+              icon={<Shield size={16} />}
+              label="Administrator"
+              sx={{
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                color: "white",
+                fontWeight: 600,
+                "& .MuiChip-icon": {
+                  color: "white",
+                },
+              }}
+            />
+            {success ? (
+              <Button
+                variant="contained"
+                startIcon={<CheckCircle size={20} />}
+                sx={{
+                  background:
+                    "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)",
+                  color: "white",
+                  px: 3,
+                  py: 1.5,
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  boxShadow: "0 4px 20px rgba(17, 153, 142, 0.4)",
+                  textTransform: "none",
+                  fontSize: "0.95rem",
+                  "&:hover": {
+                    background:
+                      "linear-gradient(135deg, #0f8a7d 0%, #2dd36f 100%)",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 6px 25px rgba(17, 153, 142, 0.5)",
+                  },
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+                Fee Generation Complete
+              </Button>
+            ) : (
+              <LoadingButton
+                variant="contained"
+                loading={loading}
+                onClick={handleTrigger}
+                startIcon={<TrendingUp size={20} />}
+                sx={{
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  color: "white",
+                  px: 3,
+                  py: 1.5,
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontSize: "0.95rem",
+                  boxShadow: "0 4px 20px rgba(102, 126, 234, 0.4)",
+                  "&:hover": {
+                    background:
+                      "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 6px 25px rgba(102, 126, 234, 0.5)",
+                  },
+                  "&:disabled": {
+                    background:
+                      "linear-gradient(135deg, #a0aec0 0%, #cbd5e0 100%)",
+                  },
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+                Generate Monthly Fees
+              </LoadingButton>
+            )}
+          </Box>
+        </Box>
+      </Paper>
+
+      {/* Main Content Grid */}
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, lg: 4 }}>
+          <Paper
+            elevation={0}
             sx={{
-              px: 3,
-              py: 1,
-              fontWeight: 600,
-              borderRadius: "10px",
-              boxShadow: "0 4px 12px rgba(0, 128, 0, 0.3)",
-            }}
-          >
-            Fee Triggered
-          </Button>
-        ) : (
-          <LoadingButton
-            variant="contained"
-            loading={loading}
-            onClick={handleTrigger}
-            sx={{
-              background: "linear-gradient(135deg, #1976d2, #42a5f5)",
-              color: "#fff",
-              px: 3,
-              py: 1,
-              fontWeight: 600,
-              borderRadius: "10px",
-              textTransform: "none",
-              boxShadow: "0 4px 12px rgba(25, 118, 210, 0.4)",
+              background: "white",
+              borderRadius: 3,
+              overflow: "hidden",
+              border: "1px solid #e0e7ff",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               "&:hover": {
-                background: "linear-gradient(135deg, #1565c0, #1e88e5)",
+                transform: "translateY(-2px)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
               },
             }}
           >
-            Trigger Monthly Fee
-          </LoadingButton>
-        )}
-      </Box>
+            <Box
+              sx={{
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                p: 2,
+                color: "white",
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Academic Classes
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                Configure class levels and academic structure
+              </Typography>
+            </Box>
+            <ClassesGrid />
+          </Paper>
+        </Grid>
 
-      {/* Main Grid */}
-      <Grid container spacing={4}>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <ClassesGrid />
+        <Grid size={{ xs: 12, lg: 4 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              background: "white",
+              borderRadius: 3,
+              overflow: "hidden",
+              border: "1px solid #e0e7ff",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              },
+            }}
+          >
+            <Box
+              sx={{
+                background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                p: 2,
+                color: "white",
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Class Sections
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                Manage sections within each class level
+              </Typography>
+            </Box>
+            <SectionsGrid />
+          </Paper>
         </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <SectionsGrid />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <FeeTypesGrid />
+
+        <Grid size={{ xs: 12, lg: 4 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              background: "white",
+              borderRadius: 3,
+              overflow: "hidden",
+              border: "1px solid #e0e7ff",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              },
+            }}
+          >
+            <Box
+              sx={{
+                background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+                p: 2,
+                color: "white",
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Fee Structure
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                Define fee types and pricing categories
+              </Typography>
+            </Box>
+            <FeeTypesGrid />
+          </Paper>
         </Grid>
       </Grid>
     </Box>
