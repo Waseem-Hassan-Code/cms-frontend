@@ -71,13 +71,15 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
       isActive: true,
       fatherName: "",
       fatherOccupation: "",
-      fatherPhone: "",
       motherName: "",
       guardianEmail: "",
       profileImageUrl: "",
       cnicNumber: "",
       birthCertificateNo: "",
       remarks: "",
+      primaryPhoneNumber: "",
+      secondaryPhoneNumber: "",
+      whatsappNumber: "",
     },
   });
 
@@ -85,7 +87,7 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
     control: feeControl,
     handleSubmit: handleFeeSubmit,
     formState: { errors: feeErrors },
-    setValue,
+    setValue: setFeeValue,
   } = useForm<FeeInfoData>({
     defaultValues: {
       selectedFeeTypes: [],
@@ -139,7 +141,12 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
         ]);
         break;
       case 2:
-        isValid = await trigger(["fatherName", "fatherPhone"]);
+        isValid = await trigger([
+          "fatherName",
+          "primaryPhoneNumber",
+          "secondaryPhoneNumber",
+          "whatsappNumber",
+        ]);
         break;
       case 3:
         isValid = await trigger([
@@ -345,7 +352,7 @@ const AdmissionForm = ({ onClose }: { onClose: () => void }) => {
       {activeStep === 4 && (
         <Box component="form" onSubmit={handleFeeSubmit(onSubmitFee)}>
           <FeeInfoStep
-            setValue={setValue}
+            setValue={setFeeValue}
             control={feeControl}
             errors={feeErrors}
           />

@@ -26,7 +26,9 @@ export interface StudentAdmissionForm {
   // Guardian Info
   fatherName: string;
   fatherOccupation: string;
-  fatherPhone: string;
+  primaryPhoneNumber: string;
+  secondaryPhoneNumber: string;
+  whatsappNumber: string;
   motherName: string;
   guardianEmail: string;
 
